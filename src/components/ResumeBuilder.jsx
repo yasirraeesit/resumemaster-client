@@ -540,6 +540,10 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
             <button className="btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem', gap: '0.35rem' }} onClick={handleSave}>
               <Save size={14} /> Save
             </button>
+
+            <button className="btn-primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', gap: '0.35rem', opacity: pdfExporting ? 0.7 : 1 }} onClick={handleDownloadPDF} disabled={pdfExporting}>
+              <Download size={14} /> {pdfExporting ? 'Export' : 'Export'}
+            </button>
             
             <button
               className="btn-secondary"
@@ -549,10 +553,6 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
               ⚡ Import
             </button>
             <input id="resume-pdf-import-input" type="file" accept=".pdf" onChange={handleImportPDF} style={{ display: 'none' }} />
-            
-            <button className="btn-primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', gap: '0.35rem', opacity: pdfExporting ? 0.7 : 1 }} onClick={handleDownloadPDF} disabled={pdfExporting}>
-              <Download size={14} /> {pdfExporting ? 'Export' : 'Export'}
-            </button>
             
             <button
               className="btn-secondary"
