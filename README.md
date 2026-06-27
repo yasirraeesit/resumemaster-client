@@ -1,6 +1,8 @@
 # 💻 ResumeMaster Frontend Client
 
-This is the React + Vite frontend application for **ResumeMaster**, the next-generation AI-powered open-source resume builder and career tracker workspace.
+**ResumeMaster is a 100% free, open-source project. Anyone can use this workspace to build professional resumes, track applications, and make their resume builder live!**
+
+This is the React + Vite frontend application for **ResumeMaster**, the next-generation AI-powered resume builder and career tracker workspace.
 
 ---
 
@@ -67,12 +69,25 @@ VITE_API_URL=http://localhost:5001/api
 
 ## ☁️ Deployment (Making it Live)
 
-You can host this React application for free on Vercel, Netlify, or Cloudflare Pages.
+You can host this React application for free on **GitHub Pages**, **Vercel**, or **Netlify**.
 
-### Vercel / Netlify Setup
+### 1. GitHub Pages (Automated Deploy Script)
+Since this repository is integrated with `gh-pages`, you can publish it live directly from your terminal:
+1. Ensure your repository remote points to GitHub.
+2. Run the deployment script:
+   ```bash
+   npm run deploy
+   ```
+   This command automatically builds the project for production (with the correct relative asset base path) and pushes the compilation bundle to the `gh-pages` branch.
+3. In your GitHub repository settings under **Pages**, ensure the build source is set to deploy from the `gh-pages` branch.
+4. Your application will be live at `https://<your-username>.github.io/resumemaster-client/`.
+
+### 2. Vercel / Netlify Setup
+If hosting via Vercel or Netlify:
 1. Set the root directory of your site deployment to `resumemaster-client`.
 2. Configure build settings:
    * **Build Command**: `npm run build`
    * **Output Directory**: `dist`
 3. Add the production environment variable:
    * `VITE_API_URL`: `https://your-deployed-backend-api.com/api`
+
