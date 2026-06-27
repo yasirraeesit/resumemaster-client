@@ -110,3 +110,13 @@ If hosting via Vercel or Netlify:
 3. Add the production environment variable:
    * `VITE_API_URL`: `https://your-deployed-backend-api.com/api`
 
+---
+
+## 💖 Support, Donations & Sponsors
+
+If ResumeMaster helped you build your resume or track jobs, please support this open-source project:
+* **⭐ Star this Repository**: Help other developers discover ResumeMaster by starring this project on GitHub.
+* **☕ Buy Me A Coffee**: Support development with a one-time donation via [Buy Me A Coffee](https://www.buymeacoffee.com/yasirraeesit).
+* **🤝 Sponsors**: Interested in corporate sponsorship to showcase your logo here? Reach out via [email/contact details] or sponsor on GitHub.
+
+
