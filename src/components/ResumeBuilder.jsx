@@ -825,7 +825,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
           {/* Add Custom Section Trigger */}
           <button 
             className="editor-sub-tab-btn" 
-            style={{ borderStyle: 'dashed', opacity: 0.8, fontSize: '0.75rem', padding: '0.35rem 0.65rem' }} 
+            style={{ borderStyle: 'dashed', opacity: 0.8 }} 
             onClick={handleAddCustomSection}
           >
             + Add Section
