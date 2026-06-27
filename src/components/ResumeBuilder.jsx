@@ -323,6 +323,36 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
     }
   };
 
+  const handleGenerateSummary = async () => {
+    setLoading(true);
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+    try {
+      const response = await fetch(`${API_URL}/ai/generate-summary`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: resumeData.personalInfo.title,
+          skills: resumeData.skills,
+          experience: resumeData.experience,
+          projects: resumeData.projects
+        })
+      });
+      const result = await response.json();
+      if (result.summary) {
+        setResumeData(prev => ({
+          ...prev,
+          summary: result.summary
+        }));
+      } else if (result.error) {
+        alert(result.error);
+      }
+    } catch (err) {
+      alert('AI summary generation failed. Make sure the server is active.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!token) {
       onTriggerAuth();
@@ -919,7 +949,17 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                 <input className="form-input" name="linkedin" value={resumeData.personalInfo.linkedin || ''} onChange={handlePersonalInfoChange} />
               </div>
               <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                <label className="form-label">Professional Summary</label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                  <label className="form-label" style={{ margin: 0 }}>Professional Summary</label>
+                  <button 
+                    className="btn-secondary" 
+                    style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', gap: '0.25rem', color: 'var(--color-primary-hover)' }} 
+                    onClick={handleGenerateSummary} 
+                    disabled={loading}
+                  >
+                    <Sparkles size={12} /> Generate with AI
+                  </button>
+                </div>
                 <textarea className="form-textarea" rows={3} value={resumeData.summary || ''} onChange={(e) => setResumeData(p => ({ ...p, summary: e.target.value }))} />
               </div>
             </div>
