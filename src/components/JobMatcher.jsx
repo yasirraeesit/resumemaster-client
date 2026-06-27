@@ -253,7 +253,7 @@ export default function JobMatcher({ resumeData, setResumeData, onAddToWishlist,
       </div>
 
       {/* RIGHT PANEL: Match Diagnostic Audits */}
-      <div className="glass-card" style={{ maxHeight: 'calc(100vh - 160px)', overflowY: 'auto' }}>
+      <div className="glass-card" style={{ maxHeight: 'calc(100vh - 130px)', overflowY: 'auto' }}>
         <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', marginBottom: '1rem' }}>Match Analytics Dashboard</h3>
 
         {/* Sync Confirmation Banner */}

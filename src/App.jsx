@@ -416,7 +416,7 @@ export default function App() {
           </nav>
         </AppHeader>
 
-        <main className="app-container" style={{ paddingBottom: '3rem' }}>
+        <main className="app-container" style={{ paddingTop: '1.5rem', paddingBottom: '1.5rem' }}>
           <div key={activeTab} className="tab-content-animate">
 
             {activeTab === 'dashboard' && (

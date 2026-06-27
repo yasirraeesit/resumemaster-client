@@ -314,7 +314,7 @@ export default function CareerSuite({ resumeData, token }) {
       </div>
 
       {/* RIGHT: Results Display Panel */}
-      <div className="glass-card" style={{ maxHeight: 'calc(100vh - 160px)', overflowY: 'auto' }}>
+      <div className="glass-card" style={{ maxHeight: 'calc(100vh - 130px)', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
           <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)' }}>
             {activeTool === 'saved' ? 'Saved Document dashboard' : 'Generated Artifacts'}
