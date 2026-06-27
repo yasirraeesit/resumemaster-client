@@ -531,56 +531,62 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
       
       {/* LEFT: Builder Form Panel */}
       <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: 'calc(100vh - 130px)', overflowY: 'auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '1.4rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '1.25rem' }}>
+          <h2 style={{ fontSize: '1.4rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
             <FileText size={22} className="logo-highlight" />
             Resume Profile Editor
           </h2>
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className="btn-secondary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }} onClick={handleSave}>
-              <Save size={16} /> Save
-            </button>
-            <button
-              className="btn-secondary"
-              style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', color: '#10b981', borderColor: 'rgba(16,185,129,0.25)', background: 'rgba(16,185,129,0.05)' }}
-              onClick={() => setShowAtsPanel(v => !v)}
-            >
-              <Target size={16} /> ATS Score
-            </button>
-            <button
-              className="btn-secondary"
-              style={{
-                padding: '0.4rem 0.8rem',
-                fontSize: '0.85rem',
-                color: bulletWarnings.length > 0 ? '#f59e0b' : 'var(--text-muted)',
-                borderColor: bulletWarnings.length > 0 ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.1)',
-                background: bulletWarnings.length > 0 ? 'rgba(245,158,11,0.06)' : 'rgba(255,255,255,0.02)',
-                position: 'relative'
-              }}
-              onClick={() => setShowBulletScanner(v => !v)}
-            >
-              <AlertTriangle size={16} /> Bullet Scan
-              {bulletWarnings.length > 0 && (
-                <span style={{
-                  position: 'absolute',
-                  top: '-6px',
-                  right: '-6px',
-                  background: '#f59e0b',
-                  color: '#000',
-                  borderRadius: '50%',
-                  fontSize: '0.65rem',
-                  fontWeight: 800,
-                  width: '16px',
-                  height: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>{bulletWarnings.length}</span>
-              )}
-            </button>
-            <button className="btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', opacity: pdfExporting ? 0.7 : 1 }} onClick={handleDownloadPDF} disabled={pdfExporting}>
-              <Download size={16} /> {pdfExporting ? 'Exporting...' : 'Export PDF'}
-            </button>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+            {/* Left side actions */}
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button className="btn-secondary" style={{ padding: '0.45rem 0.85rem', fontSize: '0.82rem' }} onClick={handleSave}>
+                <Save size={15} /> Save
+              </button>
+              <button className="btn-primary" style={{ padding: '0.45rem 0.9rem', fontSize: '0.82rem', opacity: pdfExporting ? 0.7 : 1 }} onClick={handleDownloadPDF} disabled={pdfExporting}>
+                <Download size={15} /> {pdfExporting ? 'Exporting...' : 'Export PDF'}
+              </button>
+            </div>
+            {/* Right side actions */}
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button
+                className="btn-secondary"
+                style={{ padding: '0.45rem 0.85rem', fontSize: '0.82rem', color: '#10b981', borderColor: 'rgba(16,185,129,0.25)', background: 'rgba(16,185,129,0.05)' }}
+                onClick={() => setShowAtsPanel(v => !v)}
+              >
+                <Target size={15} /> ATS Score
+              </button>
+              <button
+                className="btn-secondary"
+                style={{
+                  padding: '0.45rem 0.85rem',
+                  fontSize: '0.82rem',
+                  color: bulletWarnings.length > 0 ? '#f59e0b' : 'var(--text-muted)',
+                  borderColor: bulletWarnings.length > 0 ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.1)',
+                  background: bulletWarnings.length > 0 ? 'rgba(245,158,11,0.06)' : 'rgba(255,255,255,0.02)',
+                  position: 'relative'
+                }}
+                onClick={() => setShowBulletScanner(v => !v)}
+              >
+                <AlertTriangle size={15} /> Bullet Scan
+                {bulletWarnings.length > 0 && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '-4px',
+                    right: '-4px',
+                    background: '#f59e0b',
+                    color: '#000',
+                    borderRadius: '50%',
+                    fontSize: '0.62rem',
+                    fontWeight: 800,
+                    width: '15px',
+                    height: '15px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}>{bulletWarnings.length}</span>
+                )}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -700,10 +706,9 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
         )}
 
         {/* Tab Selector */}
-        <div style={{ display: 'flex', gap: '0.35rem', overflowX: 'auto', background: 'rgba(255,255,255,0.02)', padding: '0.25rem', borderRadius: '0.5rem', alignItems: 'center' }}>
+        <div className="editor-tabs-container">
           <button
-            className={`tab-btn ${activeSubTab === 'personal' ? 'active' : ''}`}
-            style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', borderRadius: '0.25rem' }}
+            className={`editor-sub-tab-btn ${activeSubTab === 'personal' ? 'active' : ''}`}
             onClick={() => setActiveSubTab('personal')}
           >
             CONTACT
@@ -711,8 +716,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
           {sections.map(secKey => (
             <button
               key={secKey}
-              className={`tab-btn ${activeSubTab === secKey ? 'active' : ''}`}
-              style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', borderRadius: '0.25rem', whiteSpace: 'nowrap' }}
+              className={`editor-sub-tab-btn ${activeSubTab === secKey ? 'active' : ''}`}
               onClick={() => setActiveSubTab(secKey)}
             >
               {getSectionLabel(secKey).toUpperCase()}
