@@ -537,14 +537,6 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
             Resume Profile Editor
           </h2>
           <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '0.25rem', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-            <button className="btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem', gap: '0.35rem' }} onClick={handleSave}>
-              <Save size={14} /> Save
-            </button>
-
-            <button className="btn-primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', gap: '0.35rem', opacity: pdfExporting ? 0.7 : 1 }} onClick={handleDownloadPDF} disabled={pdfExporting}>
-              <Download size={14} /> {pdfExporting ? 'Export' : 'Export'}
-            </button>
-            
             <button
               className="btn-secondary"
               style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem', gap: '0.35rem', color: '#3b82f6', borderColor: 'rgba(59,130,246,0.25)', background: 'rgba(59,130,246,0.05)' }}
@@ -553,14 +545,6 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
               ⚡ Import
             </button>
             <input id="resume-pdf-import-input" type="file" accept=".pdf" onChange={handleImportPDF} style={{ display: 'none' }} />
-            
-            <button
-              className="btn-secondary"
-              style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem', gap: '0.35rem', color: '#10b981', borderColor: 'rgba(16,185,129,0.25)', background: 'rgba(16,185,129,0.05)' }}
-              onClick={() => setShowAtsPanel(v => !v)}
-            >
-              <Target size={14} /> ATS
-            </button>
             
             <button
               className="btn-secondary"
@@ -593,6 +577,22 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                   justifyContent: 'center'
                 }}>{bulletWarnings.length}</span>
               )}
+            </button>
+
+            <button
+              className="btn-secondary"
+              style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem', gap: '0.35rem', color: '#10b981', borderColor: 'rgba(16,185,129,0.25)', background: 'rgba(16,185,129,0.05)' }}
+              onClick={() => setShowAtsPanel(v => !v)}
+            >
+              <Target size={14} /> ATS
+            </button>
+
+            <button className="btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem', gap: '0.35rem' }} onClick={handleSave}>
+              <Save size={14} /> Save
+            </button>
+
+            <button className="btn-primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', gap: '0.35rem', opacity: pdfExporting ? 0.7 : 1 }} onClick={handleDownloadPDF} disabled={pdfExporting}>
+              <Download size={14} /> {pdfExporting ? 'Export' : 'Export'}
             </button>
           </div>
         </div>
