@@ -67,10 +67,11 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
   };
 
   const handleAddCustomSection = () => {
-    const title = newSectionTitle.trim();
-    if (!title) return;
+    const title = prompt('Enter the name of your custom section:');
+    if (!title || !title.trim()) return;
     
-    const secKey = `custom_${title.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}`;
+    const cleanTitle = title.trim();
+    const secKey = `custom_${cleanTitle.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}`;
     const currentSections = resumeData.sections || ['summary', 'skills', 'experience', 'education', 'projects'];
     const updatedSections = [...currentSections, secKey];
     
@@ -80,15 +81,13 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
       customSections: {
         ...(prev.customSections || {}),
         [secKey]: {
-          title: title,
+          title: cleanTitle,
           items: []
         }
       }
     }));
     
     setActiveSubTab(secKey);
-    setIsAddingSection(false);
-    setNewSectionTitle('');
   };
 
   const handleCustomSectionItemChange = (secKey, index, value) => {
@@ -644,19 +643,105 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
 
         {parsingStatus && (
           <div style={{
-            background: 'rgba(59,130,246,0.08)',
-            border: '1px dashed rgba(59,130,246,0.25)',
-            color: '#60a5fa',
-            padding: '0.75rem 1rem',
-            borderRadius: '0.65rem',
-            fontSize: '0.82rem',
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(5, 5, 10, 0.75)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.65rem',
-            animation: 'tabFadeIn 0.25s ease'
+            justifyContent: 'center',
+            zIndex: 9999,
+            animation: 'fadeIn 0.25s ease'
           }}>
-            <span style={{ border: '2px solid rgba(255,255,255,0.1)', borderLeftColor: '#3b82f6', borderRadius: '50%', width: '14px', height: '14px', animation: 'spin 1s linear infinite', display: 'inline-block' }}></span>
-            {parsingStatus}
+            <div className="glass-card" style={{
+              padding: '2.5rem',
+              borderRadius: '1.25rem',
+              width: '400px',
+              textAlign: 'center',
+              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'linear-gradient(135deg, rgba(30,30,50,0.65), rgba(15,15,25,0.85))',
+              boxShadow: '0 20px 50px rgba(0,0,0,0.5), 0 0 30px rgba(139,92,246,0.15)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '1.5rem',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* Laser Scanning Line */}
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: '3px',
+                background: 'linear-gradient(90deg, transparent, var(--color-primary), transparent)',
+                boxShadow: '0 0 10px var(--color-primary), 0 0 20px var(--color-primary)',
+                animation: 'scanLaser 2s linear infinite'
+              }}></div>
+
+              {/* Glowing Pulse Document Icon */}
+              <div style={{
+                position: 'relative',
+                width: '80px',
+                height: '80px',
+                borderRadius: '50%',
+                background: 'rgba(139,92,246,0.05)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: '1px solid rgba(139,92,246,0.15)',
+                boxShadow: '0 0 20px rgba(139,92,246,0.08)'
+              }}>
+                <div style={{
+                  position: 'absolute',
+                  top: '-5px',
+                  left: '-5px',
+                  right: '-5px',
+                  bottom: '-5px',
+                  borderRadius: '50%',
+                  border: '2px dashed rgba(139,92,246,0.3)',
+                  animation: 'spin 8s linear infinite'
+                }}></div>
+                <FileText size={36} className="logo-highlight" style={{ opacity: 0.9 }} />
+              </div>
+
+              {/* Loader Info */}
+              <div>
+                <h3 style={{ fontSize: '1.25rem', color: 'var(--text-main)', marginBottom: '0.4rem', fontWeight: 700 }}>
+                  Analyzing Resume PDF
+                </h3>
+                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: '1.5', margin: 0 }}>
+                  {parsingStatus}
+                </p>
+              </div>
+
+              {/* Pulsing Progress Bar */}
+              <div style={{
+                width: '100%',
+                background: 'rgba(255,255,255,0.03)',
+                height: '6px',
+                borderRadius: '9999px',
+                overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.05)'
+              }}>
+                <div style={{
+                  height: '100%',
+                  background: 'linear-gradient(90deg, var(--color-primary), var(--color-primary-hover))',
+                  width: '100%',
+                  borderRadius: '9999px',
+                  animation: 'progressPulse 1.5s ease-in-out infinite'
+                }}></div>
+              </div>
+              
+              <span style={{ fontSize: '0.72rem', color: 'var(--color-primary-hover)', fontWeight: 700, letterSpacing: '0.08em' }}>
+                EXTRACTING PROFILE DATA...
+              </span>
+            </div>
           </div>
         )}
 
@@ -738,40 +823,13 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
           ))}
           
           {/* Add Custom Section Trigger */}
-          {isAddingSection ? (
-            <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '0.15rem 0.4rem', borderRadius: '0.35rem' }}>
-              <input 
-                className="form-input" 
-                style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', width: '110px', height: '28px' }} 
-                placeholder="Section Title" 
-                value={newSectionTitle}
-                onChange={e => setNewSectionTitle(e.target.value)}
-                autoFocus
-              />
-              <button 
-                className="btn-primary" 
-                style={{ padding: '0.25rem 0.55rem', fontSize: '0.72rem', height: '28px' }} 
-                onClick={handleAddCustomSection}
-              >
-                Add
-              </button>
-              <button 
-                className="btn-secondary" 
-                style={{ padding: '0.25rem 0.55rem', fontSize: '0.72rem', height: '28px' }} 
-                onClick={() => { setIsAddingSection(false); setNewSectionTitle(''); }}
-              >
-                Cancel
-              </button>
-            </div>
-          ) : (
-            <button 
-              className="btn-secondary" 
-              style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', whiteSpace: 'nowrap', borderStyle: 'dashed' }} 
-              onClick={() => setIsAddingSection(true)}
-            >
-              + Add Section
-            </button>
-          )}
+          <button 
+            className="editor-sub-tab-btn" 
+            style={{ borderStyle: 'dashed', opacity: 0.8, fontSize: '0.75rem', padding: '0.35rem 0.65rem' }} 
+            onClick={handleAddCustomSection}
+          >
+            + Add Section
+          </button>
         </div>
 
         {/* Dynamic Section Editor Header */}
