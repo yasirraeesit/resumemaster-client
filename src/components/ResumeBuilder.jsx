@@ -536,65 +536,64 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
             <FileText size={22} className="logo-highlight" />
             Resume Profile Editor
           </h2>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
-            {/* Left side actions */}
-            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-              <button className="btn-secondary" style={{ padding: '0.45rem 0.85rem', fontSize: '0.82rem' }} onClick={handleSave}>
-                <Save size={15} /> Save
-              </button>
-              <button
-                className="btn-secondary"
-                style={{ padding: '0.45rem 0.85rem', fontSize: '0.82rem', color: '#3b82f6', borderColor: 'rgba(59,130,246,0.25)', background: 'rgba(59,130,246,0.05)' }}
-                onClick={() => document.getElementById('resume-pdf-import-input').click()}
-              >
-                ⚡ Import PDF
-              </button>
-              <input id="resume-pdf-import-input" type="file" accept=".pdf" onChange={handleImportPDF} style={{ display: 'none' }} />
-              <button className="btn-primary" style={{ padding: '0.45rem 0.9rem', fontSize: '0.82rem', opacity: pdfExporting ? 0.7 : 1 }} onClick={handleDownloadPDF} disabled={pdfExporting}>
-                <Download size={15} /> {pdfExporting ? 'Exporting...' : 'Export PDF'}
-              </button>
-            </div>
-            {/* Right side actions */}
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button
-                className="btn-secondary"
-                style={{ padding: '0.45rem 0.85rem', fontSize: '0.82rem', color: '#10b981', borderColor: 'rgba(16,185,129,0.25)', background: 'rgba(16,185,129,0.05)' }}
-                onClick={() => setShowAtsPanel(v => !v)}
-              >
-                <Target size={15} /> ATS Score
-              </button>
-              <button
-                className="btn-secondary"
-                style={{
-                  padding: '0.45rem 0.85rem',
-                  fontSize: '0.82rem',
-                  color: bulletWarnings.length > 0 ? '#f59e0b' : 'var(--text-muted)',
-                  borderColor: bulletWarnings.length > 0 ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.1)',
-                  background: bulletWarnings.length > 0 ? 'rgba(245,158,11,0.06)' : 'rgba(255,255,255,0.02)',
-                  position: 'relative'
-                }}
-                onClick={() => setShowBulletScanner(v => !v)}
-              >
-                <AlertTriangle size={15} /> Bullet Scan
-                {bulletWarnings.length > 0 && (
-                  <span style={{
-                    position: 'absolute',
-                    top: '-4px',
-                    right: '-4px',
-                    background: '#f59e0b',
-                    color: '#000',
-                    borderRadius: '50%',
-                    fontSize: '0.62rem',
-                    fontWeight: 800,
-                    width: '15px',
-                    height: '15px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>{bulletWarnings.length}</span>
-                )}
-              </button>
-            </div>
+          <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'nowrap', overflowX: 'auto', paddingBottom: '0.25rem', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            <button className="btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem', gap: '0.35rem' }} onClick={handleSave}>
+              <Save size={14} /> Save
+            </button>
+            
+            <button
+              className="btn-secondary"
+              style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem', gap: '0.35rem', color: '#3b82f6', borderColor: 'rgba(59,130,246,0.25)', background: 'rgba(59,130,246,0.05)' }}
+              onClick={() => document.getElementById('resume-pdf-import-input').click()}
+            >
+              ⚡ Import
+            </button>
+            <input id="resume-pdf-import-input" type="file" accept=".pdf" onChange={handleImportPDF} style={{ display: 'none' }} />
+            
+            <button className="btn-primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', gap: '0.35rem', opacity: pdfExporting ? 0.7 : 1 }} onClick={handleDownloadPDF} disabled={pdfExporting}>
+              <Download size={14} /> {pdfExporting ? 'Export' : 'Export'}
+            </button>
+            
+            <button
+              className="btn-secondary"
+              style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem', gap: '0.35rem', color: '#10b981', borderColor: 'rgba(16,185,129,0.25)', background: 'rgba(16,185,129,0.05)' }}
+              onClick={() => setShowAtsPanel(v => !v)}
+            >
+              <Target size={14} /> ATS
+            </button>
+            
+            <button
+              className="btn-secondary"
+              style={{
+                padding: '0.35rem 0.65rem',
+                fontSize: '0.78rem',
+                gap: '0.35rem',
+                color: bulletWarnings.length > 0 ? '#f59e0b' : 'var(--text-muted)',
+                borderColor: bulletWarnings.length > 0 ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.1)',
+                background: bulletWarnings.length > 0 ? 'rgba(245,158,11,0.06)' : 'rgba(255,255,255,0.02)',
+                position: 'relative'
+              }}
+              onClick={() => setShowBulletScanner(v => !v)}
+            >
+              <AlertTriangle size={14} /> Scan
+              {bulletWarnings.length > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-4px',
+                  right: '-4px',
+                  background: '#f59e0b',
+                  color: '#000',
+                  borderRadius: '50%',
+                  fontSize: '0.6rem',
+                  fontWeight: 800,
+                  width: '14px',
+                  height: '14px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>{bulletWarnings.length}</span>
+              )}
+            </button>
           </div>
         </div>
 
