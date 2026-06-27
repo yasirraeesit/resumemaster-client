@@ -123,7 +123,7 @@ export default function Dashboard({ user, token, onNavigate, resumeData }) {
           <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 500 }}>
             {greeting()},
           </div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 900, color: '#fff', marginBottom: '0.4rem' }}>
+          <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '0.4rem' }}>
             {user?.fullName || 'Welcome back'} 👋
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
@@ -169,7 +169,7 @@ export default function Dashboard({ user, token, onNavigate, resumeData }) {
 
         {/* Quick Actions */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-          <h2 style={{ fontSize: '1rem', color: '#fff', fontWeight: 700, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h2 style={{ fontSize: '1rem', color: 'var(--text-main)', fontWeight: 700, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <TrendingUp size={18} style={{ color: 'var(--color-primary)' }} /> Quick Actions
           </h2>
           {QUICK_ACTIONS.map(({ label, tab, Icon, color, desc }) => (
@@ -208,7 +208,7 @@ export default function Dashboard({ user, token, onNavigate, resumeData }) {
                 <Icon size={18} style={{ color }} />
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff' }}>{label}</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>{label}</div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{desc}</div>
               </div>
               <ChevronRight size={16} style={{ color: 'var(--text-dim)', flexShrink: 0 }} />
@@ -218,7 +218,7 @@ export default function Dashboard({ user, token, onNavigate, resumeData }) {
 
         {/* Activity Feed */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-          <h2 style={{ fontSize: '1rem', color: '#fff', fontWeight: 700, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h2 style={{ fontSize: '1rem', color: 'var(--text-main)', fontWeight: 700, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Clock size={18} style={{ color: 'var(--color-primary)' }} /> Recent Activity
           </h2>
 
@@ -288,7 +288,7 @@ export default function Dashboard({ user, token, onNavigate, resumeData }) {
             <BarChart2 size={22} style={{ color: '#10b981' }} />
           </div>
           <div>
-            <div style={{ fontSize: '1rem', fontWeight: 700, color: '#fff' }}>
+            <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)' }}>
               Current Resume: {resumeData?.personalInfo?.fullName || 'Untitled'}
             </div>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>

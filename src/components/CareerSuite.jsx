@@ -250,7 +250,7 @@ export default function CareerSuite({ resumeData, token }) {
       
       {/* LEFT: Configuration Input */}
       <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-        <h2 style={{ fontSize: '1.3rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <h2 style={{ fontSize: '1.3rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Sparkles size={22} className="logo-highlight" />
           AI Copilot Suite
         </h2>
@@ -316,7 +316,7 @@ export default function CareerSuite({ resumeData, token }) {
       {/* RIGHT: Results Display Panel */}
       <div className="glass-card" style={{ maxHeight: '82vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
-          <h3 style={{ fontSize: '1.1rem', color: '#fff' }}>
+          <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)' }}>
             {activeTool === 'saved' ? 'Saved Document dashboard' : 'Generated Artifacts'}
           </h3>
           {copied && <span style={{ fontSize: '0.8rem', color: 'var(--color-success)', fontWeight: 'bold' }}>Copied!</span>}
@@ -382,7 +382,7 @@ export default function CareerSuite({ resumeData, token }) {
                     </div>
 
                     <div>
-                      <h4 style={{ fontSize: '0.9rem', color: '#fff', marginBottom: '0.5rem' }}>Headline Options</h4>
+                      <h4 style={{ fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '0.5rem' }}>Headline Options</h4>
                       {linkedin.headlines?.map((hl, idx) => (
                         <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.04)', marginBottom: '0.5rem', fontSize: '0.8rem' }}>
                           <span style={{ flex: 1, color: 'var(--text-muted)' }}>{hl}</span>
@@ -395,7 +395,7 @@ export default function CareerSuite({ resumeData, token }) {
 
                     <div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                        <h4 style={{ fontSize: '0.9rem', color: '#fff' }}>About Summary</h4>
+                        <h4 style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>About Summary</h4>
                         <button className="btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem' }} onClick={() => handleCopy(linkedin.about)}>
                           Copy About
                         </button>
@@ -424,12 +424,12 @@ export default function CareerSuite({ resumeData, token }) {
                           </span>
                           <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Q#{q.id}</span>
                         </div>
-                        <h4 style={{ fontSize: '0.95rem', color: '#fff', marginBottom: '0.75rem', lineHeight: '1.4' }}>{q.question}</h4>
+                        <h4 style={{ fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: '0.75rem', lineHeight: '1.4' }}>{q.question}</h4>
                         
                         {/* Audio Speech Recording Interface */}
                         <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem', border: '1px solid rgba(255,255,255,0.04)' }}>
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                            <span style={{ fontSize: '0.8rem', color: '#fff', fontWeight: 'bold' }}>Spoken Response Simulator</span>
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Spoken Response Simulator</span>
                             <button
                               className="btn-secondary"
                               onClick={() => handleRecordSpeech(q.id)}
@@ -438,7 +438,7 @@ export default function CareerSuite({ resumeData, token }) {
                                 fontSize: '0.75rem',
                                 background: recordingQuestionId === q.id ? 'var(--color-danger)' : 'transparent',
                                 borderColor: recordingQuestionId === q.id ? 'transparent' : 'rgba(255,255,255,0.15)',
-                                color: '#fff',
+                                color: 'var(--text-main)',
                                 gap: '0.25rem'
                               }}
                             >
@@ -472,8 +472,8 @@ export default function CareerSuite({ resumeData, token }) {
                         {evaluations[q.id] && (
                           <div style={{ background: 'rgba(13, 10, 26, 0.5)', padding: '1rem', borderRadius: '0.5rem', border: '1.5px solid var(--color-primary)', marginTop: '0.75rem' }}>
                             <div style={{ display: 'flex', justifycontent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                              <h5 style={{ fontSize: '0.85rem', color: '#fff', fontWeight: 'bold' }}>AI Evaluation Score</h5>
-                              <span style={{ fontSize: '0.85rem', background: 'var(--color-primary)', color: '#fff', padding: '0.15rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>
+                              <h5 style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 'bold' }}>AI Evaluation Score</h5>
+                              <span style={{ fontSize: '0.85rem', background: 'var(--color-primary)', color: 'var(--text-main)', padding: '0.15rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>
                                 {evaluations[q.id].score}/100
                               </span>
                             </div>
@@ -482,7 +482,7 @@ export default function CareerSuite({ resumeData, token }) {
                               <div><strong>Weaknesses:</strong> {evaluations[q.id].weaknesses}</div>
                               <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.5rem', borderRadius: '4px', marginTop: '0.25rem' }}>
                                 <strong>Recommended Model Answer (STAR):</strong>
-                                <p style={{ marginTop: '0.25rem', italic: 'true', fontSize: '0.75rem', color: '#fff' }}>
+                                <p style={{ marginTop: '0.25rem', italic: 'true', fontSize: '0.75rem', color: 'var(--text-main)' }}>
                                   {evaluations[q.id].modelAnswer}
                                 </p>
                               </div>
@@ -517,7 +517,7 @@ export default function CareerSuite({ resumeData, token }) {
                             <span style={{ fontSize: '0.7rem', background: doc.type === 'cover_letter' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(236, 72, 153, 0.15)', color: doc.type === 'cover_letter' ? 'var(--color-accent)' : 'var(--color-secondary)', padding: '0.15rem 0.4rem', borderRadius: '4px', fontWeight: 'bold' }}>
                               {doc.type === 'cover_letter' ? 'Cover Letter' : 'LinkedIn Opt'}
                             </span>
-                            <h4 style={{ color: '#fff', fontSize: '0.95rem', fontWeight: 'bold' }}>{doc.title}</h4>
+                            <h4 style={{ color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 'bold' }}>{doc.title}</h4>
                           </div>
                           <div style={{ display: 'flex', gap: '0.5rem' }}>
                             <button className="btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.7rem', gap: '0.25rem' }} onClick={() => handleCopy(doc.content)}>
@@ -541,11 +541,11 @@ export default function CareerSuite({ resumeData, token }) {
                                 const parsed = JSON.parse(doc.content);
                                 return (
                                   <div>
-                                    <div style={{ fontWeight: 'bold', color: '#fff', marginBottom: '0.25rem' }}>Headlines:</div>
+                                    <div style={{ fontWeight: 'bold', color: 'var(--text-main)', marginBottom: '0.25rem' }}>Headlines:</div>
                                     <ul style={{ paddingLeft: '1rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
                                       {parsed.headlines?.map((hl, i) => <li key={i}>{hl}</li>)}
                                     </ul>
-                                    <div style={{ fontWeight: 'bold', color: '#fff' }}>About Summary:</div>
+                                    <div style={{ fontWeight: 'bold', color: 'var(--text-main)' }}>About Summary:</div>
                                     <p style={{ color: 'var(--text-muted)', whiteSpace: 'pre-wrap' }}>{parsed.about}</p>
                                   </div>
                                 );

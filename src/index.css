@@ -30,17 +30,18 @@
 
 /* Light Mode Overrides if user prefers (Optional Theme Support) */
 [data-theme="light"] {
-  --bg-app: #f8fafc;
-  --bg-card: rgba(255, 255, 255, 0.85);
-  --bg-card-hover: rgba(255, 255, 255, 0.95);
-  --border-glow: rgba(139, 92, 246, 0.1);
-  --border-glow-active: rgba(139, 92, 246, 0.3);
+  --bg-app: #f4f6fa;
+  --bg-card: #ffffff;
+  --bg-card-hover: #ffffff;
+  --border-glow: rgba(139, 92, 246, 0.12);
+  --border-glow-active: rgba(139, 92, 246, 0.35);
   
   --text-main: #0f172a;
-  --text-muted: #475569;
-  --text-dim: #64748b;
+  --text-muted: #334155;
+  --text-dim: #475569;
   
-  --shadow-premium: 0 10px 30px -10px rgba(0, 0, 0, 0.05), 0 1px 1px rgba(0, 0, 0, 0.02) inset;
+  --shadow-premium: 0 20px 40px -15px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.02) inset;
+  --shadow-glow: 0 0 24px rgba(139, 92, 246, 0.12);
 }
 
 * {
@@ -417,7 +418,7 @@ p {
   font-family: 'Plus Jakarta Sans', sans-serif !important;
   font-size: 12px;
   font-weight: 700;
-  color: #8b5cf6;
+  color: var(--theme-color, #8b5cf6);
   border-bottom: none;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -429,7 +430,7 @@ p {
 .template-technical {
   font-family: var(--font-sans) !important;
   color: #1e293b;
-  border-top: 6px solid #4f46e5;
+  border-top: 6px solid var(--theme-color, #4f46e5);
   border-radius: 0.25rem;
 }
 .template-technical h1 {
@@ -441,7 +442,7 @@ p {
 .template-technical .contact-info {
   text-align: left;
   font-size: 11px;
-  color: #4f46e5;
+  color: var(--theme-color, #4f46e5);
   margin-bottom: 1.25rem;
   border-bottom: 1.5px dashed #e2e8f0;
   padding-bottom: 0.5rem;
@@ -449,8 +450,8 @@ p {
 .template-technical .section-title {
   font-size: 12px;
   color: #1e1b4b;
-  border-bottom: 2px solid #4f46e5;
-  background: #f5f3ff;
+  border-bottom: 2px solid var(--theme-color, #4f46e5);
+  background: var(--theme-bg, #f5f3ff);
   padding: 0.2rem 0.5rem;
   border-radius: 2px;
   margin-top: 1.25rem;
@@ -926,34 +927,125 @@ p {
 
 /* Light mode body / card overrides */
 [data-theme="light"] body {
-  background-color: #f1f5f9;
+  background-color: #f4f6fa;
 }
 [data-theme="light"] .glass-card {
-  background: rgba(255, 255, 255, 0.9);
-  border-color: rgba(0, 0, 0, 0.07);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  background: #ffffff;
+  border-color: #cbd5e1;
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.05);
 }
 [data-theme="light"] .app-header {
-  background: rgba(255, 255, 255, 0.95);
-  border-bottom-color: rgba(0, 0, 0, 0.07);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.06);
+}
+[data-theme="light"] .logo {
+  color: #0f172a !important;
 }
 [data-theme="light"] .tab-btn {
   color: #475569;
 }
+[data-theme="light"] .tab-btn:hover {
+  color: #0f172a;
+}
 [data-theme="light"] .tab-btn.active {
-  color: var(--color-primary);
-  background: rgba(139, 92, 246, 0.08);
+  color: #ffffff;
+  background: linear-gradient(135deg, var(--color-primary), rgba(139, 92, 246, 0.8));
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
 }
 [data-theme="light"] .form-input,
 [data-theme="light"] .form-textarea,
 [data-theme="light"] .form-select {
-  background: #fff;
-  border-color: #e2e8f0;
+  background: #ffffff;
+  border-color: #cbd5e1;
   color: #0f172a;
 }
-[data-theme="light"] .form-label {
-  color: #374151;
+[data-theme="light"] .form-input:focus,
+[data-theme="light"] .form-textarea:focus,
+[data-theme="light"] .form-select:focus {
+  background: #ffffff;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
 }
+[data-theme="light"] .form-label {
+  color: #475569;
+}
+[data-theme="light"] .bento-card {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.05);
+}
+[data-theme="light"] .bento-card h3 {
+  color: #0f172a !important;
+}
+[data-theme="light"] .bento-card p {
+  color: #475569 !important;
+}
+[data-theme="light"] .bento-card li {
+  color: #334155 !important;
+}
+[data-theme="light"] .testimonial-card {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow: 0 20px 40px -15px rgba(15, 23, 42, 0.05);
+}
+[data-theme="light"] .testimonial-card h4 {
+  color: #0f172a !important;
+}
+[data-theme="light"] .testimonial-card p {
+  color: #475569 !important;
+}
+[data-theme="light"] .testimonial-card div {
+  color: #0f172a !important;
+}
+[data-theme="light"] .workflow-interactive-tab {
+  background: #ffffff;
+  border-color: rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.02);
+}
+[data-theme="light"] .workflow-interactive-tab h4 {
+  color: #0f172a !important;
+}
+[data-theme="light"] .workflow-interactive-tab p {
+  color: #475569 !important;
+}
+[data-theme="light"] .workflow-interactive-tab.active {
+  background: rgba(139, 92, 246, 0.04);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.06);
+}
+[data-theme="light"] .kanban-card {
+  background: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+}
+[data-theme="light"] .kanban-column {
+  background: rgba(15, 23, 42, 0.02);
+  border-color: rgba(15, 23, 42, 0.04);
+}
+[data-theme="light"] .kanban-header {
+  color: #0f172a !important;
+  border-bottom-color: rgba(15, 23, 42, 0.08);
+}
+[data-theme="light"] .editor-menu-item {
+  color: #475569 !important;
+}
+[data-theme="light"] .editor-menu-item:hover {
+  color: #0f172a !important;
+}
+[data-theme="light"] .btn-secondary {
+  background: rgba(15, 23, 42, 0.05);
+  border-color: rgba(15, 23, 42, 0.08);
+  color: #0f172a;
+}
+[data-theme="light"] .btn-secondary:hover {
+  background: rgba(15, 23, 42, 0.1);
+  border-color: rgba(15, 23, 42, 0.15);
+  color: #0f172a;
+}
+
+
 
 /* =====================================================
    RESUME TEMPLATE: EXECUTIVE TWO-COLUMN
@@ -1169,6 +1261,48 @@ p {
   color: var(--text-muted);
   font-weight: 500;
 }
+
+/* =====================================================
+   RESUME TEMPLATE CAROUSEL SLIDER STYLES
+   ===================================================== */
+.slider-nav-btn {
+  pointer-events: auto !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.slider-nav-btn:hover {
+  background: #ffffff !important;
+  color: var(--color-primary) !important;
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.25) !important;
+  border-color: rgba(139, 92, 246, 0.4) !important;
+}
+
+.slider-nav-btn:active {
+  transform: scale(0.95);
+}
+
+.a4-document {
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15) !important;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.4s ease;
+}
+
+/* Custom bullet styling inside scaled A4 docs */
+.a4-document ul {
+  padding-left: 1.1rem;
+}
+
+.a4-document li {
+  line-height: 1.45;
+}
+
+/* Pulsing bullet indicator for vector ready badge */
+@keyframes pulseGreen {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
 
 
 

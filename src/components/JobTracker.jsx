@@ -1,42 +1,8 @@
 import React, { useState } from 'react';
 import { Plus, Trash2, ArrowRight, ArrowLeft, Briefcase, DollarSign, Calendar } from 'lucide-react';
 
-const INITIAL_COLUMNS = {
-  wishlist: {
-    title: 'Wishlist',
-    color: '#8b5cf6',
-    items: [
-      { id: '1', company: 'Stripe', role: 'Staff Frontend Engineer', salary: '$180k - $220k', date: '2026-06-22', notes: 'Tailor resume for API patterns.' }
-    ]
-  },
-  applied: {
-    title: 'Applied',
-    color: '#3b82f6',
-    items: [
-      { id: '2', company: 'Airbnb', role: 'Senior React Developer', salary: '$165k - $190k', date: '2026-06-20', notes: 'Submitted tailored resume.' }
-    ]
-  },
-  interviewing: {
-    title: 'Interviewing',
-    color: '#f59e0b',
-    items: [
-      { id: '3', company: 'Google', role: 'UX Engineer', salary: '$200k', date: '2026-06-24', notes: 'Technical round scheduled.' }
-    ]
-  },
-  offered: {
-    title: 'Offered',
-    color: '#10b981',
-    items: []
-  },
-  rejected: {
-    title: 'Rejected',
-    color: '#ef4444',
-    items: []
-  }
-};
 
-export default function JobTracker() {
-  const [columns, setColumns] = useState(INITIAL_COLUMNS);
+export default function JobTracker({ columns, setColumns }) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [newJob, setNewJob] = useState({ company: '', role: '', salary: '', date: '', notes: '' });
 
@@ -99,7 +65,7 @@ export default function JobTracker() {
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <h2 style={{ fontSize: '1.3rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <h2 style={{ fontSize: '1.3rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Briefcase size={22} className="logo-highlight" />
           Job Search Pipeline (Kanban)
         </h2>
@@ -159,7 +125,7 @@ export default function JobTracker() {
                 {col.items.map((job) => (
                   <div key={job.id} className="kanban-card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
-                      <h4 style={{ fontSize: '0.9rem', color: '#fff' }}>{job.role}</h4>
+                      <h4 style={{ fontSize: '0.9rem', color: 'var(--text-main)' }}>{job.role}</h4>
                       <button style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }} onClick={() => deleteCard(job.id, colKey)}>
                         <Trash2 size={13} hover="color: red" />
                       </button>

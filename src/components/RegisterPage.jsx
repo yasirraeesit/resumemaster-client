@@ -40,10 +40,10 @@ export default function RegisterPage({ onBack, onAuthSuccess, onNavigateToLogin 
       gridTemplateColumns: '1fr 1.1fr',
       minHeight: '88vh',
       background: 'var(--bg-app)',
-      color: '#fff',
+      color: 'var(--text-main)',
       borderRadius: '1.25rem',
       overflow: 'hidden',
-      border: '1px solid rgba(255,255,255,0.06)',
+      border: '1px solid var(--border-glow)',
       boxShadow: 'var(--shadow-premium)'
     }}>
       
@@ -105,7 +105,7 @@ export default function RegisterPage({ onBack, onAuthSuccess, onNavigateToLogin 
 
       {/* RIGHT PANEL: Sleek Registration Form */}
       <div style={{
-        background: '#0d0b18',
+        background: 'var(--bg-card)',
         padding: '4rem 3.5rem',
         display: 'flex',
         flexDirection: 'column',
@@ -113,7 +113,7 @@ export default function RegisterPage({ onBack, onAuthSuccess, onNavigateToLogin 
       }}>
         <div style={{ maxWidth: '400px', width: '100%', margin: '0 auto' }}>
           <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '1.75rem', fontWeight: '800', color: '#fff', marginBottom: '0.5rem' }}>Get Started</h3>
+            <h3 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '0.5rem' }}>Get Started</h3>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>Create your free developer profile to save unlimited resumes.</p>
           </div>
 

@@ -126,7 +126,7 @@ export default function SettingsPage({ user, token, onLogout, onUpdateUser, dark
     account: (
       <form onSubmit={handleSaveAccount} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <div>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fff', marginBottom: '0.35rem' }}>Account Information</h2>
+          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.35rem' }}>Account Information</h2>
           <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Update your name and email address.</p>
         </div>
         <StatusMsg msg={accStatus} type={accType} />
@@ -155,7 +155,7 @@ export default function SettingsPage({ user, token, onLogout, onUpdateUser, dark
     security: (
       <form onSubmit={handleSavePassword} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <div>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fff', marginBottom: '0.35rem' }}>Security Settings</h2>
+          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.35rem' }}>Security Settings</h2>
           <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Change your password to keep your account secure.</p>
         </div>
         <StatusMsg msg={secStatus} type={secType} />
@@ -197,7 +197,7 @@ export default function SettingsPage({ user, token, onLogout, onUpdateUser, dark
     appearance: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <div>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fff', marginBottom: '0.35rem' }}>Appearance</h2>
+          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.35rem' }}>Appearance</h2>
           <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Personalise the look and feel of your workspace.</p>
         </div>
 
@@ -208,7 +208,7 @@ export default function SettingsPage({ user, token, onLogout, onUpdateUser, dark
               {darkMode ? <Moon size={20} style={{ color: '#a78bfa' }} /> : <Sun size={20} style={{ color: '#f59e0b' }} />}
             </div>
             <div>
-              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff' }}>{darkMode ? 'Dark Mode' : 'Light Mode'}</div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>{darkMode ? 'Dark Mode' : 'Light Mode'}</div>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                 {darkMode ? 'Deep dark theme — easy on the eyes' : 'Clean light theme — great for bright environments'}
               </div>
@@ -226,7 +226,7 @@ export default function SettingsPage({ user, token, onLogout, onUpdateUser, dark
 
         {/* Notification toggles */}
         <div>
-          <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff', marginBottom: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <h3 style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.1rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
             <Bell size={15} style={{ color: 'var(--color-primary)' }} /> Notifications
           </h3>
           <div className="glass-card" style={{ marginTop: '0.75rem', padding: '0.25rem 1rem' }}>
@@ -240,7 +240,7 @@ export default function SettingsPage({ user, token, onLogout, onUpdateUser, dark
     privacy: (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <div>
-          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#fff', marginBottom: '0.35rem' }}>Privacy</h2>
+          <h2 style={{ fontSize: '1.15rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.35rem' }}>Privacy</h2>
           <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Control what data is used and how.</p>
         </div>
         <div className="glass-card" style={{ padding: '0.25rem 1rem' }}>
@@ -267,7 +267,7 @@ export default function SettingsPage({ user, token, onLogout, onUpdateUser, dark
         <div style={{ border: '1px solid rgba(239,68,68,0.2)', borderRadius: '1rem', overflow: 'hidden' }}>
           <div style={{ padding: '1.25rem 1.5rem', background: 'rgba(239,68,68,0.04)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff', marginBottom: '0.2rem' }}>Sign Out</div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.2rem' }}>Sign Out</div>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Clear your session. Your data stays safe in the cloud.</div>
             </div>
             <button
@@ -283,7 +283,7 @@ export default function SettingsPage({ user, token, onLogout, onUpdateUser, dark
 
           <div style={{ padding: '1.25rem 1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#fff', marginBottom: '0.2rem' }}>Delete Account</div>
+              <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)', marginBottom: '0.2rem' }}>Delete Account</div>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Permanently delete your account and all associated data.</div>
             </div>
             <button

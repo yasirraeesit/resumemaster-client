@@ -12,7 +12,7 @@ import Dashboard      from './components/Dashboard';
 import { ToastProvider } from './components/Toast';
 import {
   FileText, Flame, Briefcase, Award,
-  LogIn, LayoutDashboard, Settings, LogOut, User,
+  LogIn, LayoutDashboard, Settings, LogOut, User, Sun, Moon,
 } from 'lucide-react';
 
 /* ── Demo resume data ───────────────────────────────────────────── */
@@ -39,6 +39,34 @@ const INITIAL_RESUME = {
     description: '• Interactive CSS variable playground, 5,000+ monthly developers.',
     url: 'github.com/janedoe/sandbox',
   }],
+  sections: ['summary', 'skills', 'experience', 'education', 'projects'],
+};
+
+/* ── Default Kanban board state (shared between Matcher + Tracker) ── */
+const INITIAL_TRACKER_COLUMNS = {
+  wishlist: {
+    title: 'Wishlist',
+    color: '#8b5cf6',
+    items: [
+      { id: '1', company: 'Stripe', role: 'Staff Frontend Engineer', salary: '$180k - $220k', date: '2026-06-22', notes: 'Tailor resume for API patterns.' }
+    ]
+  },
+  applied: {
+    title: 'Applied',
+    color: '#3b82f6',
+    items: [
+      { id: '2', company: 'Airbnb', role: 'Senior React Developer', salary: '$165k - $190k', date: '2026-06-20', notes: 'Submitted tailored resume.' }
+    ]
+  },
+  interviewing: {
+    title: 'Interviewing',
+    color: '#f59e0b',
+    items: [
+      { id: '3', company: 'Google', role: 'UX Engineer', salary: '$200k', date: '2026-06-24', notes: 'Technical round scheduled.' }
+    ]
+  },
+  offered:  { title: 'Offered',  color: '#10b981', items: [] },
+  rejected: { title: 'Rejected', color: '#ef4444', items: [] }
 };
 
 /* ── Workspace pages (not shown in top nav — accessed via dropdown) ─ */
@@ -183,7 +211,7 @@ function AppHeader({ user, onLogoClick, onSignIn, onGetStarted, darkMode, toggle
         {/* Right controls */}
         <div style={{ display: 'flex', gap: '0.6rem', alignItems: 'center' }}>
           <button className="theme-toggle-btn" onClick={toggleTheme} title="Toggle theme">
-            {darkMode ? '☀️' : '🌙'}
+            {darkMode ? <Sun size={15} /> : <Moon size={15} />}
           </button>
           {user ? (
             <ProfileDropdown
@@ -213,12 +241,50 @@ function AppHeader({ user, onLogoClick, onSignIn, onGetStarted, darkMode, toggle
    ═══════════════════════════════════════════════════════════════════ */
 export default function App() {
   /* ── Core state ─────────────────────────────────────────────────── */
-  const [view,       setView]       = useState('landing'); // 'landing' | 'workspace' | 'login' | 'register'
-  const [activeTab,  setActiveTab]  = useState('dashboard');
-  const [resumeData, setResumeData] = useState(INITIAL_RESUME);
   const [token,      setToken]      = useState(() => localStorage.getItem('token') || '');
   const [user,       setUser]       = useState(() => JSON.parse(localStorage.getItem('user') || 'null'));
-  const [darkMode,   setDarkMode]   = useState(true);
+  const [view,       setView]       = useState(() => {
+    const savedToken = localStorage.getItem('token');
+    const savedView = localStorage.getItem('view');
+    if (savedToken) {
+      return savedView || 'workspace';
+    }
+    return 'landing';
+  });
+  const [activeTab,  setActiveTab]  = useState(() => {
+    return localStorage.getItem('activeTab') || 'dashboard';
+  });
+  const [resumeData,       setResumeData]       = useState(INITIAL_RESUME);
+  const [trackerColumns,   setTrackerColumns]   = useState(INITIAL_TRACKER_COLUMNS);
+  const [darkMode,         setDarkMode]         = useState(true);
+
+  // Sync view and active workspace tab to localStorage
+  useEffect(() => {
+    localStorage.setItem('view', view);
+    if (view === 'workspace') {
+      localStorage.setItem('activeTab', activeTab);
+    }
+  }, [activeTab, view]);
+
+  // Sync right-swipe jobs from Matcher → Tracker Wishlist
+  const addToTrackerWishlist = useCallback((job) => {
+    const newCard = {
+      id: `synced_${Date.now()}`,
+      company: job.company,
+      role: job.title,
+      salary: '',
+      date: new Date().toISOString().split('T')[0],
+      notes: `Auto-synced from Job Matcher. ${job.location ? `Location: ${job.location}.` : ''}`.trim(),
+      url: job.url || ''
+    };
+    setTrackerColumns(prev => ({
+      ...prev,
+      wishlist: {
+        ...prev.wishlist,
+        items: [...prev.wishlist.items, newCard]
+      }
+    }));
+  }, []);
 
   /* ── Helpers ──────────────────────────────────────────────────────  */
   const toggleTheme = () => {
@@ -251,6 +317,8 @@ export default function App() {
     setUser(null);
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    localStorage.removeItem('view');
+    localStorage.removeItem('activeTab');
     setActiveTab('dashboard');
     setView('landing');
   };
@@ -345,10 +413,18 @@ export default function App() {
               <ResumeBuilder resumeData={resumeData} setResumeData={setResumeData} token={token} onTriggerAuth={() => setView('login')} />
             )}
             {activeTab === 'matcher' && (
-              <JobMatcher resumeData={resumeData} setResumeData={setResumeData} />
+              <JobMatcher
+                resumeData={resumeData}
+                setResumeData={setResumeData}
+                onAddToWishlist={addToTrackerWishlist}
+                onGoToTracker={() => setActiveTab('tracker')}
+              />
             )}
             {activeTab === 'tracker' && (
-              <JobTracker />
+              <JobTracker
+                columns={trackerColumns}
+                setColumns={setTrackerColumns}
+              />
             )}
             {activeTab === 'copilot' && (
               <CareerSuite resumeData={resumeData} token={token} />

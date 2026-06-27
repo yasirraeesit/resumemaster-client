@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Sparkles, FileText, Download, Save, Plus, Trash2, ArrowRight, Target, X, CheckCircle, XCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Sparkles, FileText, Download, Save, Plus, Trash2, ArrowRight, Target, X, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 
 export default function ResumeBuilder({ resumeData, setResumeData, token, onTriggerAuth }) {
   const [activeSubTab, setActiveSubTab] = useState('personal');
@@ -7,15 +7,208 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
   const [saveStatus, setSaveStatus] = useState('');
   const [availableResumes, setAvailableResumes] = useState([]);
   const [parsingStatus, setParsingStatus] = useState('');
+  const [importPreview, setImportPreview] = useState(null); // { data, warnings, method }
   const [selectedTemplate, setSelectedTemplate] = useState('elegant');
   const [pdfExporting, setPdfExporting] = useState(false);
   const resumePreviewRef = useRef(null);
 
+  const [isAddingSection, setIsAddingSection] = useState(false);
+  const [newSectionTitle, setNewSectionTitle] = useState('');
+
+  const [layoutSettings, setLayoutSettings] = useState({
+    fontSize: 13,
+    lineHeight: 1.45,
+    margin: 12,
+    accentColor: '#3b82f6',
+    showCustomizer: false
+  });
+
+  const sections = resumeData.sections || ['summary', 'skills', 'experience', 'education', 'projects'];
+
+  const getSectionLabel = (key) => {
+    if (key === 'summary') return 'Summary';
+    if (key === 'skills') return 'Skills';
+    if (key === 'experience') return 'Work Experience';
+    if (key === 'education') return 'Education';
+    if (key === 'projects') return 'Projects';
+    
+    const customSec = resumeData.customSections?.[key];
+    if (customSec) return customSec.title;
+    
+    return key.charAt(0).toUpperCase() + key.slice(1);
+  };
+
+  const isFirstSection = (key) => {
+    return sections.indexOf(key) <= 0;
+  };
+
+  const isLastSection = (key) => {
+    const idx = sections.indexOf(key);
+    return idx === -1 || idx === sections.length - 1;
+  };
+
+  const moveSection = (sectionKey, direction) => {
+    const currentSections = resumeData.sections || ['summary', 'skills', 'experience', 'education', 'projects'];
+    const index = currentSections.indexOf(sectionKey);
+    if (index === -1) return;
+    
+    const newIndex = direction === 'up' ? index - 1 : index + 1;
+    if (newIndex < 0 || newIndex >= currentSections.length) return;
+    
+    const updatedSections = [...currentSections];
+    const temp = updatedSections[index];
+    updatedSections[index] = updatedSections[newIndex];
+    updatedSections[newIndex] = temp;
+    
+    setResumeData(prev => ({
+      ...prev,
+      sections: updatedSections
+    }));
+  };
+
+  const handleAddCustomSection = () => {
+    const title = newSectionTitle.trim();
+    if (!title) return;
+    
+    const secKey = `custom_${title.toLowerCase().replace(/[^a-z0-9]/g, '_')}_${Date.now()}`;
+    const currentSections = resumeData.sections || ['summary', 'skills', 'experience', 'education', 'projects'];
+    const updatedSections = [...currentSections, secKey];
+    
+    setResumeData(prev => ({
+      ...prev,
+      sections: updatedSections,
+      customSections: {
+        ...(prev.customSections || {}),
+        [secKey]: {
+          title: title,
+          items: []
+        }
+      }
+    }));
+    
+    setActiveSubTab(secKey);
+    setIsAddingSection(false);
+    setNewSectionTitle('');
+  };
+
+  const handleCustomSectionItemChange = (secKey, index, value) => {
+    setResumeData(prev => {
+      const customSections = { ...(prev.customSections || {}) };
+      const section = { ...customSections[secKey] };
+      const items = [...(section.items || [])];
+      items[index] = value;
+      section.items = items;
+      customSections[secKey] = section;
+      return {
+        ...prev,
+        customSections
+      };
+    });
+  };
+
+  const addCustomSectionItem = (secKey) => {
+    setResumeData(prev => {
+      const customSections = { ...(prev.customSections || {}) };
+      const section = { ...customSections[secKey] };
+      const items = [...(section.items || []), ''];
+      section.items = items;
+      customSections[secKey] = section;
+      return {
+        ...prev,
+        customSections
+      };
+    });
+  };
+
+  const removeCustomSectionItem = (secKey, index) => {
+    setResumeData(prev => {
+      const customSections = { ...(prev.customSections || {}) };
+      const section = { ...customSections[secKey] };
+      const items = [...(section.items || [])];
+      items.splice(index, 1);
+      section.items = items;
+      customSections[secKey] = section;
+      return {
+        ...prev,
+        customSections
+      };
+    });
+  };
+
+  const deleteCustomSection = (secKey) => {
+    if (!confirm('Are you sure you want to delete this custom section?')) return;
+    
+    const currentSections = resumeData.sections || ['summary', 'skills', 'experience', 'education', 'projects'];
+    const updatedSections = currentSections.filter(k => k !== secKey);
+    
+    setResumeData(prev => {
+      const customSections = { ...(prev.customSections || {}) };
+      delete customSections[secKey];
+      return {
+        ...prev,
+        sections: updatedSections,
+        customSections
+      };
+    });
+    
+    setActiveSubTab('personal');
+  };
+
   // ATS Score Engine state
   const [showAtsPanel, setShowAtsPanel] = useState(false);
+  const [showBulletScanner, setShowBulletScanner] = useState(false);
   const [atsJd, setAtsJd]               = useState('');
   const [atsLoading, setAtsLoading]     = useState(false);
   const [atsResult, setAtsResult]       = useState(null);
+
+  // ── Passive Bullet Point Weak-Word Scanner ─────────────────────────
+  const WEAK_PATTERNS = [
+    { regex: /^(worked on|work on)/i,    suggestion: 'Led', icon: '⚡' },
+    { regex: /^(helped with|helped)/i,   suggestion: 'Contributed to', icon: '💡' },
+    { regex: /^(assisted|assisting)/i,   suggestion: 'Supported', icon: '🔧' },
+    { regex: /^(responsible for)/i,      suggestion: 'Owned', icon: '🎯' },
+    { regex: /^(did|does|doing)/i,       suggestion: 'Executed', icon: '✅' },
+    { regex: /^(made)/i,                 suggestion: 'Built / Engineered', icon: '🏗️' },
+    { regex: /^(was in charge of)/i,     suggestion: 'Managed', icon: '📋' },
+    { regex: /^(tried to)/i,             suggestion: 'Achieved', icon: '🚀' },
+    { regex: /^(used|using)/i,           suggestion: 'Leveraged', icon: '⚙️' },
+    { regex: /^(got)/i,                  suggestion: 'Delivered', icon: '📦' },
+    { regex: /^(wrote)/i,                suggestion: 'Authored / Developed', icon: '✍️' },
+    { regex: /^(fixed)/i,                suggestion: 'Resolved / Optimized', icon: '🔩' },
+    { regex: /\bvarious\b/i,             suggestion: 'List specific examples instead of "various"', icon: '📝' },
+    { regex: /\bseveral\b/i,             suggestion: 'Be specific — use numbers like "5+ projects"', icon: '🔢' },
+    { regex: /\bsome\b/i,                suggestion: 'Quantify — avoid vague "some"', icon: '📊' },
+  ];
+
+  const bulletWarnings = useMemo(() => {
+    const warnings = [];
+    const allBullets = [
+      ...(resumeData.experience || []).flatMap((exp, expIdx) =>
+        (exp.description || '').split('\n').filter(Boolean).map(line => ({
+          line: line.replace(/^[•\-\s]*/, '').trim(),
+          source: `Experience #${expIdx + 1}`,
+          expIdx
+        }))
+      ),
+      ...(resumeData.projects || []).flatMap((proj, projIdx) =>
+        (proj.description || '').split('\n').filter(Boolean).map(line => ({
+          line: line.replace(/^[•\-\s]*/, '').trim(),
+          source: `Project: ${proj.name || `#${projIdx + 1}`}`,
+          projIdx
+        }))
+      )
+    ];
+
+    allBullets.forEach(({ line, source }) => {
+      WEAK_PATTERNS.forEach(({ regex, suggestion, icon }) => {
+        if (regex.test(line)) {
+          warnings.push({ line, source, suggestion, icon });
+        }
+      });
+    });
+
+    return warnings;
+  }, [resumeData.experience, resumeData.projects]);
 
   useEffect(() => {
     fetchResumes();
@@ -148,10 +341,83 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
     }
   };
 
+  // ── Client-side import normalizer ─────────────────────────────────
+  const normalizeImportedResume = (data) => {
+    if (!data || typeof data !== 'object') return null;
+
+    const cleanBullets = (str) => {
+      if (!str || typeof str !== 'string') return '';
+      return str
+        .replace(/\r\n/g, '\n')
+        .replace(/\n{2,}/g, '\n')
+        .split('\n')
+        .map(l => l.replace(/^[•\-\*\s]+/, '').trim())
+        .filter(l => l.length > 1)
+        .map(l => `• ${l}`)
+        .join('\n');
+    };
+
+    const toArr = (v) => Array.isArray(v) ? v : [];
+    const toStr = (v) => (v && typeof v === 'string') ? v.trim() : '';
+
+    return {
+      personalInfo: {
+        fullName:  toStr(data.personalInfo?.fullName),
+        title:     toStr(data.personalInfo?.title),
+        email:     toStr(data.personalInfo?.email),
+        phone:     toStr(data.personalInfo?.phone),
+        location:  toStr(data.personalInfo?.location),
+        website:   toStr(data.personalInfo?.website),
+        github:    toStr(data.personalInfo?.github),
+        linkedin:  toStr(data.personalInfo?.linkedin),
+      },
+      summary: toStr(data.summary),
+      skills: toArr(data.skills).map(toStr).filter(Boolean),
+      experience: toArr(data.experience).map(e => ({
+        company:   toStr(e.company),
+        role:      toStr(e.role),
+        location:  toStr(e.location || ''),
+        startDate: toStr(e.startDate),
+        endDate:   toStr(e.endDate),
+        description: cleanBullets(e.description)
+      })),
+      education: toArr(data.education).map(e => ({
+        school:       toStr(e.school),
+        degree:       toStr(e.degree),
+        fieldOfStudy: toStr(e.fieldOfStudy || ''),
+        startDate:    toStr(e.startDate),
+        endDate:      toStr(e.endDate),
+        description:  cleanBullets(e.description || '')
+      })),
+      projects: toArr(data.projects).map(p => ({
+        name:        toStr(p.name),
+        description: cleanBullets(p.description),
+        url:         toStr(p.url)
+      })),
+      sections: data.sections || ['summary', 'skills', 'experience', 'education', 'projects'],
+      customSections: data.customSections || {}
+    };
+  };
+
+  const buildImportWarnings = (data) => {
+    const warnings = [];
+    (data.experience || []).forEach((exp, i) => {
+      if (!exp.role || exp.role === 'Unknown Role') warnings.push(`Experience #${i + 1}: Role title not detected`);
+      if (!exp.company || exp.company === 'Unknown Company') warnings.push(`Experience #${i + 1}: Company name not detected`);
+    });
+    (data.education || []).forEach((edu, i) => {
+      if (!edu.school) warnings.push(`Education #${i + 1}: School name not detected`);
+    });
+    if (!data.personalInfo?.fullName) warnings.push('Full name could not be extracted');
+    if (!data.personalInfo?.email)    warnings.push('Email address not found in PDF');
+    return warnings;
+  };
+
   const handleImportPDF = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     setParsingStatus('Uploading & parsing PDF...');
+    setImportPreview(null);
     const formData = new FormData();
     formData.append('resume', file);
 
@@ -163,17 +429,29 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
       });
       const result = await response.json();
       if (result.success && result.extractedData) {
-        setResumeData(result.extractedData);
-        setParsingStatus('PDF parsed and imported successfully!');
+        const normalized = normalizeImportedResume(result.extractedData);
+        const warnings = buildImportWarnings(normalized);
+        setImportPreview({ data: normalized, warnings, method: result.method || 'unknown' });
+        setParsingStatus('');
       } else {
         setParsingStatus(result.error || 'Failed to parse PDF.');
+        setTimeout(() => setParsingStatus(''), 5000);
       }
     } catch (err) {
       setParsingStatus('Upload error. Backend offline or PDF parser broken.');
-    } finally {
       setTimeout(() => setParsingStatus(''), 5000);
     }
   };
+
+  const applyImport = () => {
+    if (!importPreview) return;
+    setResumeData(importPreview.data);
+    setImportPreview(null);
+    setActiveSubTab('personal');
+    setSaveStatus('Resume imported! Review and edit the fields below.');
+    setTimeout(() => setSaveStatus(''), 5000);
+  };
+
 
   const handleDownloadPDF = async () => {
     const element = resumePreviewRef.current;
@@ -196,7 +474,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
       const filename = `${name}-ResumeMaster.pdf`;
 
       const options = {
-        margin:       [10, 10, 10, 10],
+        margin:       0,
         filename:     filename,
         image:        { type: 'jpeg', quality: 0.98 },
         html2canvas:  { scale: 2, useCORS: true, logging: false },
@@ -254,7 +532,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
       {/* LEFT: Builder Form Panel */}
       <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '82vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ fontSize: '1.4rem', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h2 style={{ fontSize: '1.4rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <FileText size={22} className="logo-highlight" />
             Resume Profile Editor
           </h2>
@@ -269,6 +547,37 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
             >
               <Target size={16} /> ATS Score
             </button>
+            <button
+              className="btn-secondary"
+              style={{
+                padding: '0.4rem 0.8rem',
+                fontSize: '0.85rem',
+                color: bulletWarnings.length > 0 ? '#f59e0b' : 'var(--text-muted)',
+                borderColor: bulletWarnings.length > 0 ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.1)',
+                background: bulletWarnings.length > 0 ? 'rgba(245,158,11,0.06)' : 'rgba(255,255,255,0.02)',
+                position: 'relative'
+              }}
+              onClick={() => setShowBulletScanner(v => !v)}
+            >
+              <AlertTriangle size={16} /> Bullet Scan
+              {bulletWarnings.length > 0 && (
+                <span style={{
+                  position: 'absolute',
+                  top: '-6px',
+                  right: '-6px',
+                  background: '#f59e0b',
+                  color: '#000',
+                  borderRadius: '50%',
+                  fontSize: '0.65rem',
+                  fontWeight: 800,
+                  width: '16px',
+                  height: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>{bulletWarnings.length}</span>
+              )}
+            </button>
             <button className="btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem', opacity: pdfExporting ? 0.7 : 1 }} onClick={handleDownloadPDF} disabled={pdfExporting}>
               <Download size={16} /> {pdfExporting ? 'Exporting...' : 'Export PDF'}
             </button>
@@ -276,6 +585,49 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
         </div>
 
         {saveStatus && <div style={{ color: 'var(--color-primary)', fontWeight: 'bold', fontSize: '0.9rem' }}>{saveStatus}</div>}
+
+        {/* Bullet Point Weak-Word Scanner Panel */}
+        {showBulletScanner && (
+          <div className="glass-card" style={{ marginBottom: '1rem', padding: '1.25rem', border: '1px solid rgba(245,158,11,0.15)', background: 'rgba(245,158,11,0.03)', animation: 'tabFadeIn 0.2s ease' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <h4 style={{ fontSize: '0.9rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                <AlertTriangle size={15} style={{ color: '#f59e0b' }} />
+                Bullet Strength Diagnostics
+              </h4>
+              <button onClick={() => setShowBulletScanner(false)} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}>
+                <X size={14} />
+              </button>
+            </div>
+
+            {bulletWarnings.length === 0 ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#10b981', fontSize: '0.85rem' }}>
+                <CheckCircle size={16} /> All bullets look strong — no weak openers detected!
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>
+                  {bulletWarnings.length} weak phrasing{bulletWarnings.length > 1 ? 's' : ''} detected. Replace them with stronger action verbs:
+                </p>
+                {bulletWarnings.map((w, i) => (
+                  <div key={i} style={{ display: 'grid', gridTemplateColumns: '1.2rem 1fr auto', gap: '0.5rem', alignItems: 'start', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.1)', padding: '0.6rem 0.75rem', borderRadius: '0.5rem', fontSize: '0.78rem' }}>
+                    <span>{w.icon}</span>
+                    <div>
+                      <div style={{ color: 'var(--text-dim)', marginBottom: '0.15rem' }}>
+                        <em>"{w.line.length > 65 ? w.line.slice(0, 65) + '…' : w.line}"</em>
+                      </div>
+                      <div style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>
+                        📍 {w.source}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right', color: '#10b981', fontSize: '0.72rem', whiteSpace: 'nowrap', fontWeight: 600 }}>
+                      → {w.suggestion}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Quick Import Widget */}
         <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', padding: '1rem', borderRadius: '0.75rem' }}>
@@ -288,24 +640,166 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
           {parsingStatus && <div style={{ fontSize: '0.85rem', color: 'var(--color-secondary)', marginTop: '0.5rem', textAlign: 'center' }}>{parsingStatus}</div>}
         </div>
 
+        {/* Import Review Card */}
+        {importPreview && (
+          <div className="glass-card" style={{ border: '1px solid rgba(139,92,246,0.25)', background: 'rgba(139,92,246,0.04)', padding: '1.25rem', animation: 'tabFadeIn 0.3s ease' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
+              <div>
+                <h4 style={{ fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  📄 Import Preview
+                  <span style={{ fontSize: '0.7rem', background: importPreview.method === 'gemini' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: importPreview.method === 'gemini' ? '#10b981' : '#f59e0b', padding: '0.1rem 0.4rem', borderRadius: '9999px', fontWeight: 600 }}>
+                    {importPreview.method === 'gemini' ? '✨ AI Parsed' : '⚙️ Heuristic'}
+                  </span>
+                </h4>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Review the extracted data before loading it into the builder.</p>
+              </div>
+              <button onClick={() => setImportPreview(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}>
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Summary counts */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '0.5rem', marginBottom: '1rem' }}>
+              {[
+                { label: 'Experience', count: importPreview.data.experience?.length || 0, icon: '💼' },
+                { label: 'Education',  count: importPreview.data.education?.length  || 0, icon: '🎓' },
+                { label: 'Projects',   count: importPreview.data.projects?.length   || 0, icon: '🚀' },
+                { label: 'Skills',     count: importPreview.data.skills?.length     || 0, icon: '⚡' },
+                { label: 'Name',       count: importPreview.data.personalInfo?.fullName ? '✓' : '✗', icon: '👤', isText: true },
+              ].map(({ label, count, icon, isText }) => (
+                <div key={label} style={{ textAlign: 'center', background: 'rgba(255,255,255,0.03)', borderRadius: '0.5rem', padding: '0.6rem 0.25rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+                  <div style={{ fontSize: '1rem' }}>{icon}</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 700, color: 'var(--text-main)', lineHeight: 1.2 }}>
+                    {isText ? <span style={{ color: count === '✓' ? '#10b981' : '#ef4444' }}>{count}</span> : count}
+                  </div>
+                  <div style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>{label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Warnings */}
+            {importPreview.warnings.length > 0 && (
+              <div style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)', borderRadius: '0.5rem', padding: '0.75rem', marginBottom: '1rem' }}>
+                <p style={{ fontSize: '0.75rem', color: '#f59e0b', fontWeight: 600, marginBottom: '0.3rem' }}>⚠️ {importPreview.warnings.length} field{importPreview.warnings.length > 1 ? 's' : ''} need review:</p>
+                {importPreview.warnings.map((w, i) => (
+                  <div key={i} style={{ fontSize: '0.72rem', color: 'var(--text-muted)', paddingLeft: '0.75rem' }}>• {w}</div>
+                ))}
+              </div>
+            )}
+
+            {/* Actions */}
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button className="btn-primary" style={{ flex: 1, fontSize: '0.85rem' }} onClick={applyImport}>
+                <CheckCircle size={14} /> Accept & Load into Builder
+              </button>
+              <button className="btn-secondary" style={{ fontSize: '0.85rem' }} onClick={() => setImportPreview(null)}>
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Tab Selector */}
-        <div style={{ display: 'flex', gap: '0.25rem', overflowX: 'auto', background: 'rgba(255,255,255,0.02)', padding: '0.25rem', borderRadius: '0.5rem' }}>
-          {['personal', 'experience', 'education', 'projects', 'skills'].map(tab => (
+        <div style={{ display: 'flex', gap: '0.35rem', overflowX: 'auto', background: 'rgba(255,255,255,0.02)', padding: '0.25rem', borderRadius: '0.5rem', alignItems: 'center' }}>
+          <button
+            className={`tab-btn ${activeSubTab === 'personal' ? 'active' : ''}`}
+            style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', borderRadius: '0.25rem' }}
+            onClick={() => setActiveSubTab('personal')}
+          >
+            CONTACT
+          </button>
+          {sections.map(secKey => (
             <button
-              key={tab}
-              className={`tab-btn ${activeSubTab === tab ? 'active' : ''}`}
-              style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', borderRadius: '0.25rem' }}
-              onClick={() => setActiveSubTab(tab)}
+              key={secKey}
+              className={`tab-btn ${activeSubTab === secKey ? 'active' : ''}`}
+              style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', borderRadius: '0.25rem', whiteSpace: 'nowrap' }}
+              onClick={() => setActiveSubTab(secKey)}
             >
-              {tab.toUpperCase()}
+              {getSectionLabel(secKey).toUpperCase()}
             </button>
           ))}
+          
+          {/* Add Custom Section Trigger */}
+          {isAddingSection ? (
+            <div style={{ display: 'flex', gap: '0.25rem', alignItems: 'center', background: 'rgba(255,255,255,0.02)', padding: '0.15rem 0.4rem', borderRadius: '0.35rem' }}>
+              <input 
+                className="form-input" 
+                style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', width: '110px', height: '28px' }} 
+                placeholder="Section Title" 
+                value={newSectionTitle}
+                onChange={e => setNewSectionTitle(e.target.value)}
+                autoFocus
+              />
+              <button 
+                className="btn-primary" 
+                style={{ padding: '0.25rem 0.55rem', fontSize: '0.72rem', height: '28px' }} 
+                onClick={handleAddCustomSection}
+              >
+                Add
+              </button>
+              <button 
+                className="btn-secondary" 
+                style={{ padding: '0.25rem 0.55rem', fontSize: '0.72rem', height: '28px' }} 
+                onClick={() => { setIsAddingSection(false); setNewSectionTitle(''); }}
+              >
+                Cancel
+              </button>
+            </div>
+          ) : (
+            <button 
+              className="btn-secondary" 
+              style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', whiteSpace: 'nowrap', borderStyle: 'dashed' }} 
+              onClick={() => setIsAddingSection(true)}
+            >
+              + Add Section
+            </button>
+          )}
         </div>
+
+        {/* Dynamic Section Editor Header */}
+        {activeSubTab !== 'personal' && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', padding: '0.5rem 0.85rem', borderRadius: '0.5rem' }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>
+              Section Positioning:
+            </span>
+            <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+              <button 
+                className="btn-secondary" 
+                style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', opacity: isFirstSection(activeSubTab) ? 0.3 : 1, cursor: isFirstSection(activeSubTab) ? 'not-allowed' : 'pointer' }}
+                onClick={() => moveSection(activeSubTab, 'up')}
+                disabled={isFirstSection(activeSubTab)}
+                title="Move section up"
+              >
+                ▲ Move Up
+              </button>
+              <button 
+                className="btn-secondary" 
+                style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', opacity: isLastSection(activeSubTab) ? 0.3 : 1, cursor: isLastSection(activeSubTab) ? 'not-allowed' : 'pointer' }}
+                onClick={() => moveSection(activeSubTab, 'down')}
+                disabled={isLastSection(activeSubTab)}
+                title="Move section down"
+              >
+                ▼ Move Down
+              </button>
+              {activeSubTab.startsWith('custom_') && (
+                <button 
+                  className="btn-secondary" 
+                  style={{ padding: '0.2rem 0.5rem', fontSize: '0.75rem', color: 'var(--color-danger)', borderColor: 'rgba(239,68,68,0.2)' }}
+                  onClick={() => deleteCustomSection(activeSubTab)}
+                  title="Delete this section"
+                >
+                  Delete Section
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
 
         {/* Profile Info Subtab */}
         {activeSubTab === 'personal' && (
           <div>
-            <h3 style={{ fontSize: '1rem', color: '#fff', marginBottom: '1rem' }}>Personal Details</h3>
+            <h3 style={{ fontSize: '1rem', color: 'var(--text-main)', marginBottom: '1rem' }}>Personal Details</h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
               <div className="form-group">
                 <label className="form-label">Full Name</label>
@@ -343,7 +837,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
         {activeSubTab === 'experience' && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ fontSize: '1rem', color: '#fff' }}>Work History</h3>
+              <h3 style={{ fontSize: '1rem', color: 'var(--text-main)' }}>Work History</h3>
               <button className="btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }} onClick={() => addArrayItem('experience', { company: '', role: '', startDate: '', endDate: '', location: '', description: '' })}>
                 <Plus size={14} /> Add Role
               </button>
@@ -380,7 +874,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
         {activeSubTab === 'education' && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ fontSize: '1rem', color: '#fff' }}>Academic History</h3>
+              <h3 style={{ fontSize: '1rem', color: 'var(--text-main)' }}>Academic History</h3>
               <button className="btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }} onClick={() => addArrayItem('education', { school: '', degree: '', fieldOfStudy: '', startDate: '', endDate: '', description: '' })}>
                 <Plus size={14} /> Add Education
               </button>
@@ -408,7 +902,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
         {activeSubTab === 'projects' && (
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-              <h3 style={{ fontSize: '1rem', color: '#fff' }}>Projects</h3>
+              <h3 style={{ fontSize: '1rem', color: 'var(--text-main)' }}>Projects</h3>
               <button className="btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }} onClick={() => addArrayItem('projects', { name: '', description: '', url: '' })}>
                 <Plus size={14} /> Add Project
               </button>
@@ -440,11 +934,53 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
         {/* Skills Subtab */}
         {activeSubTab === 'skills' && (
           <div>
-            <h3 style={{ fontSize: '1rem', color: '#fff', marginBottom: '1rem' }}>Technical Keywords</h3>
+            <h3 style={{ fontSize: '1rem', color: 'var(--text-main)', marginBottom: '1rem' }}>Technical Keywords</h3>
             <div className="form-group">
               <label className="form-label">Keywords (Comma-separated)</label>
               <textarea className="form-textarea" rows={5} placeholder="React, Node.js, AWS, Postgres, TailwindCSS..." value={resumeData.skills ? resumeData.skills.join(', ') : ''} onChange={handleSkillsChange} />
             </div>
+          </div>
+        )}
+
+        {/* Custom Section Editor */}
+        {activeSubTab.startsWith('custom_') && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>List of Achievements / Entries:</span>
+              <button 
+                className="btn-secondary" 
+                style={{ padding: '0.3rem 0.6rem', fontSize: '0.8rem' }} 
+                onClick={() => addCustomSectionItem(activeSubTab)}
+              >
+                <Plus size={14} /> Add Bullet
+              </button>
+            </div>
+            
+            {((resumeData.customSections?.[activeSubTab]?.items) || []).map((item, idx) => (
+              <div key={idx} style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', alignItems: 'center' }}>
+                <span style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}>•</span>
+                <input 
+                  className="form-input" 
+                  style={{ flex: 1 }} 
+                  placeholder="e.g. AWS Certified Solutions Architect" 
+                  value={item || ''} 
+                  onChange={(e) => handleCustomSectionItemChange(activeSubTab, idx, e.target.value)} 
+                />
+                <button 
+                  className="btn-secondary" 
+                  style={{ padding: '0.5rem', color: 'var(--color-danger)' }} 
+                  onClick={() => removeCustomSectionItem(activeSubTab, idx)}
+                >
+                  <Trash2 size={16} />
+                </button>
+              </div>
+            ))}
+            
+            {((resumeData.customSections?.[activeSubTab]?.items) || []).length === 0 && (
+              <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-dim)', fontSize: '0.85rem', border: '1px dashed rgba(255,255,255,0.05)', borderRadius: '0.75rem' }}>
+                No entries added yet. Click "Add Bullet" to add your first point.
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -453,14 +989,121 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
       <div style={{ overflowY: 'auto', maxHeight: '82vh' }}>
         <div className="glass-card" style={{ padding: '0.75rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderRadius: '0.75rem' }}>
           <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Template Layout:</span>
-          <select className="form-select" style={{ padding: '0.3rem 1.5rem 0.3rem 0.75rem', fontSize: '0.8rem', background: 'rgba(255,255,255,0.05)', color: '#fff', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }} value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)}>
-            <option value="elegant"   style={{ background: '#121020', color: '#fff' }}>Elegant Serif</option>
-            <option value="modern"    style={{ background: '#121020', color: '#fff' }}>Modern Minimalist</option>
-            <option value="technical" style={{ background: '#121020', color: '#fff' }}>Technical Indigo</option>
-            <option value="executive" style={{ background: '#121020', color: '#fff' }}>Executive Two-Column</option>
-            <option value="creative"  style={{ background: '#121020', color: '#fff' }}>Creative Gradient</option>
-          </select>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <select className="form-select" style={{ padding: '0.3rem 1.5rem 0.3rem 0.75rem', fontSize: '0.8rem', background: 'rgba(255,255,255,0.05)', color: 'var(--text-main)', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }} value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)}>
+              <option value="elegant"   style={{ background: '#121020', color: 'var(--text-main)' }}>Elegant Serif</option>
+              <option value="modern"    style={{ background: '#121020', color: 'var(--text-main)' }}>Modern Minimalist</option>
+              <option value="technical" style={{ background: '#121020', color: 'var(--text-main)' }}>Technical Indigo</option>
+              <option value="executive" style={{ background: '#121020', color: 'var(--text-main)' }}>Executive Two-Column</option>
+              <option value="creative"  style={{ background: '#121020', color: 'var(--text-main)' }}>Creative Gradient</option>
+            </select>
+            <button 
+              className="btn-secondary" 
+              style={{ 
+                padding: '0.3rem 0.65rem', 
+                fontSize: '0.8rem', 
+                borderColor: layoutSettings.showCustomizer ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)', 
+                background: layoutSettings.showCustomizer ? 'rgba(139,92,246,0.1)' : 'rgba(255,255,255,0.025)',
+                color: 'var(--text-main)'
+              }} 
+              onClick={() => setLayoutSettings(prev => ({ ...prev, showCustomizer: !prev.showCustomizer }))}
+            >
+              ⚙️ Spacing
+            </button>
+          </div>
         </div>
+
+        {/* Spacing & Layout Customizer Drawer */}
+        {layoutSettings.showCustomizer && (
+          <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem', borderRadius: '0.75rem', display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'tabFadeIn 0.2s ease' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
+              
+              {/* Font Size Slider */}
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
+                  <span>Font Size</span>
+                  <span style={{ fontWeight: 'bold', color: 'var(--color-primary-hover)' }}>{layoutSettings.fontSize}px</span>
+                </label>
+                <input 
+                  type="range" 
+                  min="10" 
+                  max="16" 
+                  step="1" 
+                  style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--color-primary)' }}
+                  value={layoutSettings.fontSize} 
+                  onChange={e => setLayoutSettings(prev => ({ ...prev, fontSize: parseInt(e.target.value) }))} 
+                />
+              </div>
+
+              {/* Line Height Slider */}
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
+                  <span>Line Spacing</span>
+                  <span style={{ fontWeight: 'bold', color: 'var(--color-primary-hover)' }}>{layoutSettings.lineHeight}x</span>
+                </label>
+                <input 
+                  type="range" 
+                  min="1.1" 
+                  max="1.8" 
+                  step="0.05" 
+                  style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--color-primary)' }}
+                  value={layoutSettings.lineHeight} 
+                  onChange={e => setLayoutSettings(prev => ({ ...prev, lineHeight: parseFloat(e.target.value) }))} 
+                />
+              </div>
+
+              {/* Margins Slider */}
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
+                  <span>Margins (A4 padding)</span>
+                  <span style={{ fontWeight: 'bold', color: 'var(--color-primary-hover)' }}>{layoutSettings.margin}mm</span>
+                </label>
+                <input 
+                  type="range" 
+                  min="5" 
+                  max="24" 
+                  step="1" 
+                  style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--color-primary)' }}
+                  value={layoutSettings.margin} 
+                  onChange={e => setLayoutSettings(prev => ({ ...prev, margin: parseInt(e.target.value) }))} 
+                />
+              </div>
+
+              {/* Accent Color picker */}
+              <div className="form-group" style={{ margin: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <label className="form-label" style={{ fontSize: '0.78rem', marginBottom: '0.35rem' }}>Accent Theme Color</label>
+                <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
+                  {[
+                    { hex: '#3b82f6', name: 'Indigo' },
+                    { hex: '#10b981', name: 'Emerald' },
+                    { hex: '#6d28d9', name: 'Purple' },
+                    { hex: '#ec4899', name: 'Rose' },
+                    { hex: '#0f172a', name: 'Slate' }
+                  ].map(color => (
+                    <button
+                      key={color.hex}
+                      onClick={() => setLayoutSettings(prev => ({ ...prev, accentColor: color.hex }))}
+                      style={{
+                        width: '22px',
+                        height: '22px',
+                        borderRadius: '50%',
+                        background: color.hex,
+                        border: layoutSettings.accentColor === color.hex ? '2px solid #fff' : '1px solid rgba(255,255,255,0.15)',
+                        boxShadow: layoutSettings.accentColor === color.hex ? '0 0 8px rgba(139,92,246,0.6)' : 'none',
+                        cursor: 'pointer',
+                        padding: 0,
+                        transition: 'all 0.15s ease'
+                      }}
+                      title={color.name}
+                    />
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
 
         {/* ATS Score Panel — overlays the preview when active */}
         {showAtsPanel && (
@@ -548,7 +1191,18 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
           </div>
         )}
 
-        <div className={`resume-preview-container template-${selectedTemplate}`} id="printable-cv" ref={resumePreviewRef}>
+        <div 
+          className={`resume-preview-container template-${selectedTemplate}`} 
+          id="printable-cv" 
+          ref={resumePreviewRef}
+          style={{
+            fontSize: `${layoutSettings.fontSize}px`,
+            lineHeight: layoutSettings.lineHeight,
+            padding: `${layoutSettings.margin}mm`,
+            '--theme-color': layoutSettings.accentColor,
+            '--theme-bg': layoutSettings.accentColor + '0d'
+          }}
+        >
           <h1>{resumeData.personalInfo.fullName || 'Your Name'}</h1>
           <div className="contact-info">
             {resumeData.personalInfo.title && <span>{resumeData.personalInfo.title}</span>}
@@ -558,82 +1212,118 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
             {resumeData.personalInfo.linkedin && <span> | {resumeData.personalInfo.linkedin}</span>}
           </div>
 
-          {resumeData.summary && (
-            <>
-              <div className="section-title">Summary</div>
-              <p style={{ fontSize: '13px', color: '#334155' }}>{resumeData.summary}</p>
-            </>
-          )}
-
-          {resumeData.skills && resumeData.skills.length > 0 && (
-            <>
-              <div className="section-title">Skills & Technologies</div>
-              <p style={{ fontSize: '13px', color: '#334155', fontWeight: 'bold' }}>
-                {resumeData.skills.join(', ')}
-              </p>
-            </>
-          )}
-
-          {resumeData.experience && resumeData.experience.length > 0 && (
-            <>
-              <div className="section-title">Work Experience</div>
-              {resumeData.experience.map((exp, idx) => (
-                <div key={idx} style={{ marginBottom: '1rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '13.5px' }}>
-                    <span>{exp.role} — {exp.company}</span>
-                    <span>{exp.startDate} - {exp.endDate}</span>
-                  </div>
-                  {exp.description && (
-                    <ul style={{ paddingLeft: '1.2rem', marginTop: '0.25rem', fontSize: '12.5px', color: '#334155' }}>
-                      {exp.description.split('\n').filter(Boolean).map((bullet, bidx) => (
-                        <li key={bidx} style={{ listStyleType: 'disc', marginBottom: '0.15rem' }}>
-                          {bullet.replace(/^[•\-\s]*/, '')}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+          {sections.map(secKey => {
+            if (secKey === 'summary' && resumeData.summary) {
+              return (
+                <div key="summary">
+                  <div className="section-title">Summary</div>
+                  <p style={{ fontSize: '13px', color: '#334155' }}>{resumeData.summary}</p>
                 </div>
-              ))}
-            </>
-          )}
-
-          {resumeData.education && resumeData.education.length > 0 && (
-            <>
-              <div className="section-title">Education</div>
-              {resumeData.education.map((edu, idx) => (
-                <div key={idx} style={{ marginBottom: '0.75rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '13.5px' }}>
-                    <span>{edu.school}</span>
-                    <span>{edu.startDate} - {edu.endDate}</span>
-                  </div>
-                  <div style={{ fontSize: '12.5px', color: '#334155', italic: 'true' }}>{edu.degree}</div>
+              );
+            }
+            if (secKey === 'skills' && resumeData.skills && resumeData.skills.length > 0) {
+              return (
+                <div key="skills">
+                  <div className="section-title">Skills & Technologies</div>
+                  <p style={{ fontSize: '13px', color: '#334155', fontWeight: 'bold' }}>
+                    {resumeData.skills.join(', ')}
+                  </p>
                 </div>
-              ))}
-            </>
-          )}
-
-          {resumeData.projects && resumeData.projects.length > 0 && (
-            <>
-              <div className="section-title">Personal Projects</div>
-              {resumeData.projects.map((proj, idx) => (
-                <div key={idx} style={{ marginBottom: '1rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '13.5px' }}>
-                    <span>{proj.name}</span>
-                    {proj.url && <span style={{ fontSize: '11px', color: '#2563eb' }}>{proj.url}</span>}
-                  </div>
-                  {proj.description && (
-                    <ul style={{ paddingLeft: '1.2rem', marginTop: '0.25rem', fontSize: '12.5px', color: '#334155' }}>
-                      {proj.description.split('\n').filter(Boolean).map((bullet, bidx) => (
-                        <li key={bidx} style={{ listStyleType: 'disc', marginBottom: '0.15rem' }}>
-                          {bullet.replace(/^[•\-\s]*/, '')}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+              );
+            }
+            if (secKey === 'experience' && resumeData.experience && resumeData.experience.length > 0) {
+              return (
+                <div key="experience">
+                  <div className="section-title">Work Experience</div>
+                  {resumeData.experience.map((exp, idx) => (
+                    <div key={idx} style={{ marginBottom: '1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '13.5px' }}>
+                        <span>{exp.role} — {exp.company}</span>
+                        <span>{exp.startDate} - {exp.endDate}</span>
+                      </div>
+                      {exp.description && (
+                        <ul style={{ paddingLeft: '1.2rem', marginTop: '0.25rem', fontSize: '12.5px', color: '#334155' }}>
+                          {exp.description
+                            .replace(/\r\n/g, '\n').replace(/\n{2,}/g, '\n')
+                            .split('\n')
+                            .map(b => b.replace(/^[•\-\*\s]+/, '').trim())
+                            .filter(b => b.length > 1)
+                            .map((bullet, bidx) => (
+                              <li key={bidx} style={{ listStyleType: 'disc', marginBottom: '0.15rem' }}>
+                                {bullet}
+                              </li>
+                            ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </>
-          )}
+              );
+            }
+            if (secKey === 'education' && resumeData.education && resumeData.education.length > 0) {
+              return (
+                <div key="education">
+                  <div className="section-title">Education</div>
+                  {resumeData.education.map((edu, idx) => (
+                    <div key={idx} style={{ marginBottom: '0.75rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '13.5px' }}>
+                        <span>{edu.school}</span>
+                        <span>{edu.startDate} - {edu.endDate}</span>
+                      </div>
+                      <div style={{ fontSize: '12.5px', color: '#334155', italic: 'true' }}>{edu.degree}</div>
+                    </div>
+                  ))}
+                </div>
+              );
+            }
+            if (secKey === 'projects' && resumeData.projects && resumeData.projects.length > 0) {
+              return (
+                <div key="projects">
+                  <div className="section-title">Personal Projects</div>
+                  {resumeData.projects.map((proj, idx) => (
+                    <div key={idx} style={{ marginBottom: '1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '13.5px' }}>
+                        <span>{proj.name}</span>
+                        {proj.url && <span style={{ fontSize: '11px', color: '#2563eb' }}>{proj.url}</span>}
+                      </div>
+                      {proj.description && (
+                        <ul style={{ paddingLeft: '1.2rem', marginTop: '0.25rem', fontSize: '12.5px', color: '#334155' }}>
+                          {proj.description
+                            .replace(/\r\n/g, '\n').replace(/\n{2,}/g, '\n')
+                            .split('\n')
+                            .map(b => b.replace(/^[•\-\*\s]+/, '').trim())
+                            .filter(b => b.length > 1)
+                            .map((bullet, bidx) => (
+                              <li key={bidx} style={{ listStyleType: 'disc', marginBottom: '0.15rem' }}>
+                                {bullet}
+                              </li>
+                            ))}
+                        </ul>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            }
+            
+            // Custom sections
+            const customSec = resumeData.customSections?.[secKey];
+            if (customSec && customSec.items && customSec.items.length > 0) {
+              return (
+                <div key={secKey}>
+                  <div className="section-title">{customSec.title}</div>
+                  <ul style={{ paddingLeft: '1.2rem', marginTop: '0.25rem', fontSize: '12.5px', color: '#334155' }}>
+                    {customSec.items.map((item, idx) => (
+                      <li key={idx} style={{ listStyleType: 'disc', marginBottom: '0.15rem' }}>
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            }
+            return null;
+          })}
         </div>
       </div>
       

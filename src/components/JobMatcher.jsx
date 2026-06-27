@@ -29,7 +29,7 @@ const SAMPLE_JOBS = [
   }
 ];
 
-export default function JobMatcher({ resumeData, setResumeData }) {
+export default function JobMatcher({ resumeData, setResumeData, onAddToWishlist, onGoToTracker }) {
   const [jobs, setJobs] = useState(SAMPLE_JOBS);
   const [jobIndex, setJobIndex] = useState(0);
   const [customJd, setCustomJd] = useState('');
@@ -38,6 +38,7 @@ export default function JobMatcher({ resumeData, setResumeData }) {
   const [suggestions, setSuggestions] = useState('');
   const [suggestLoading, setSuggestLoading] = useState(false);
   const [swipeDir, setSwipeDir] = useState('');
+  const [syncedJob, setSyncedJob] = useState(null);
 
   // Fetch live developer jobs from Arbeitnow public API
   useEffect(() => {
@@ -121,12 +122,21 @@ export default function JobMatcher({ resumeData, setResumeData }) {
 
   const handleSwipe = (dir) => {
     setSwipeDir(dir);
+    const jobBeingActedOn = currentJob;
     setTimeout(() => {
       if (dir === 'right') {
+        // Push to tracker wishlist
+        if (onAddToWishlist) {
+          onAddToWishlist(jobBeingActedOn);
+          setSyncedJob(jobBeingActedOn);
+          // Auto-dismiss the banner after 6s
+          setTimeout(() => setSyncedJob(null), 6000);
+        }
         // Run match diagnostic on either full description or summary description
-        handleMatch(currentJob.fullDescription || currentJob.description);
+        handleMatch(jobBeingActedOn.fullDescription || jobBeingActedOn.description);
       } else {
         setMatchResult(null);
+        setSyncedJob(null);
         setJobIndex(prev => prev + 1);
       }
       setSwipeDir('');
@@ -181,14 +191,14 @@ export default function JobMatcher({ resumeData, setResumeData }) {
       
       {/* LEFT PANEL: Tinder-style card deck */}
       <div>
-        <h2 style={{ fontSize: '1.3rem', color: '#fff', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+        <h2 style={{ fontSize: '1.3rem', color: 'var(--text-main)', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <Flame size={22} className="logo-highlight" />
           Interactive Job Swiper
         </h2>
 
         {/* Custom JD Entry */}
         <div className="glass-card" style={{ marginBottom: '1.5rem', padding: '1.25rem' }}>
-          <h4 style={{ fontSize: '0.9rem', color: '#fff', marginBottom: '0.5rem' }}>Match Custom Job Description</h4>
+          <h4 style={{ fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '0.5rem' }}>Match Custom Job Description</h4>
           <textarea
             className="form-textarea"
             placeholder="Paste any active job posting description here to calculate ATS match score..."
@@ -217,7 +227,7 @@ export default function JobMatcher({ resumeData, setResumeData }) {
               </div>
             </div>
             
-            <h3 style={{ fontSize: '1.25rem', color: '#fff', marginBottom: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '1.25rem', color: 'var(--text-main)', marginBottom: '0.75rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               {currentJob.title}
               {currentJob.url && (
                 <a href={currentJob.url} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-primary-hover)' }}>
@@ -244,8 +254,40 @@ export default function JobMatcher({ resumeData, setResumeData }) {
 
       {/* RIGHT PANEL: Match Diagnostic Audits */}
       <div className="glass-card" style={{ maxHeight: '82vh', overflowY: 'auto' }}>
-        <h3 style={{ fontSize: '1.1rem', color: '#fff', marginBottom: '1rem' }}>Match Analytics Dashboard</h3>
+        <h3 style={{ fontSize: '1.1rem', color: 'var(--text-main)', marginBottom: '1rem' }}>Match Analytics Dashboard</h3>
 
+        {/* Sync Confirmation Banner */}
+        {syncedJob && (
+          <div style={{
+            background: 'rgba(16, 185, 129, 0.08)',
+            border: '1px solid rgba(16, 185, 129, 0.25)',
+            borderRadius: '0.65rem',
+            padding: '0.85rem 1rem',
+            marginBottom: '1rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.5rem',
+            animation: 'tabFadeIn 0.3s ease'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <span style={{ fontSize: '1.1rem' }}>🎯</span>
+              <div>
+                <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#10b981' }}>Added to Wishlist!</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  <strong>{syncedJob.title}</strong> @ {syncedJob.company} is now in your Job Tracker.
+                </div>
+              </div>
+            </div>
+            <button
+              className="btn-secondary"
+              style={{ fontSize: '0.72rem', padding: '0.25rem 0.6rem', whiteSpace: 'nowrap', borderColor: 'rgba(16,185,129,0.3)', color: '#10b981' }}
+              onClick={onGoToTracker}
+            >
+              View Tracker →
+            </button>
+          </div>
+        )}
         {loading ? (
           <div style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '3rem' }}>Analyzing Compatibility and Keywords...</div>
         ) : matchResult ? (
@@ -254,12 +296,12 @@ export default function JobMatcher({ resumeData, setResumeData }) {
             {/* Score Ring */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.05)' }}>
               <div style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '50%', background: `conic-gradient(var(--color-primary) ${matchResult.score}%, rgba(255,255,255,0.05) 0)`, display: 'flex', alignItems: 'center', justifyItems: 'center', justifyContent: 'center' }}>
-                <div style={{ width: '68px', height: '68px', borderRadius: '50%', background: 'var(--bg-card)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '1.25rem', color: '#fff' }}>
+                <div style={{ width: '68px', height: '68px', borderRadius: '50%', background: 'var(--bg-card)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '1.25rem', color: 'var(--text-main)' }}>
                   {matchResult.score}%
                 </div>
               </div>
               <div>
-                <h4 style={{ color: '#fff', fontSize: '1rem' }}>ATS Alignment Rating</h4>
+                <h4 style={{ color: 'var(--text-main)', fontSize: '1rem' }}>ATS Alignment Rating</h4>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                   {matchResult.score >= 80 ? 'Highly compatible! Ideal layout.' : matchResult.score >= 50 ? 'Medium compatibility. Add missing keywords.' : 'Low compatibility. Major gaps detected.'}
                 </p>
@@ -268,7 +310,7 @@ export default function JobMatcher({ resumeData, setResumeData }) {
 
             {/* Keyword gaps */}
             <div>
-              <h4 style={{ fontSize: '0.9rem', color: '#fff', marginBottom: '0.5rem' }}>Keywords Check</h4>
+              <h4 style={{ fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '0.5rem' }}>Keywords Check</h4>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1rem' }}>
                 {matchResult.matchedKeywords?.map((kw, i) => (
                   <span key={i} style={{ fontSize: '0.75rem', background: 'rgba(16, 185, 129, 0.15)', color: 'var(--color-success)', padding: '0.25rem 0.5rem', borderRadius: '0.25rem' }}>
@@ -294,7 +336,7 @@ export default function JobMatcher({ resumeData, setResumeData }) {
                   
                   {suggestions && (
                     <div style={{ marginTop: '0.75rem' }}>
-                      <pre style={{ fontSize: '0.75rem', color: '#fff', background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '0.5rem', overflowX: 'auto', whiteSpace: 'pre-wrap' }}>
+                      <pre style={{ fontSize: '0.75rem', color: 'var(--text-main)', background: 'rgba(0,0,0,0.2)', padding: '0.75rem', borderRadius: '0.5rem', overflowX: 'auto', whiteSpace: 'pre-wrap' }}>
                         {suggestions}
                       </pre>
                       <button className="btn-primary" style={{ fontSize: '0.7rem', padding: '0.3rem 0.6rem', marginTop: '0.5rem' }} onClick={handleAddSuggestion}>
@@ -309,7 +351,7 @@ export default function JobMatcher({ resumeData, setResumeData }) {
             {/* Structured match analysis summary */}
             {matchResult.analysis && (
               <div style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
-                <h4 style={{ fontSize: '0.9rem', color: '#fff', marginBottom: '0.5rem' }}>AI Match Diagnostic Summary</h4>
+                <h4 style={{ fontSize: '0.9rem', color: 'var(--text-main)', marginBottom: '0.5rem' }}>AI Match Diagnostic Summary</h4>
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
                   {matchResult.analysis}
                 </p>

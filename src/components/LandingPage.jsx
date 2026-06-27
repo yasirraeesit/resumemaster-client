@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, Zap, Target, PenTool, Flame, ListChecks, HelpCircle, Check, Award, Wand2, Globe, Heart, Shield, RefreshCw, FileText, FileUp, Sparkle, Plus } from 'lucide-react';
+import ResumeTemplateSlider from './ResumeTemplateSlider';
 
 export default function LandingPage({ onLaunchWorkspace }) {
   const [activeFaq, setActiveFaq] = useState(null);
@@ -55,11 +56,11 @@ export default function LandingPage({ onLaunchWorkspace }) {
           <div style={{ position: 'absolute', top: '10%', left: '10%', width: '300px', height: '300px', background: 'rgba(139,92,246,0.15)', filter: 'blur(80px)', borderRadius: '50%', pointerEvents: 'none' }} />
           
           <div style={{ maxWidth: '540px', zIndex: 2 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', padding: '0.5rem 1.25rem', borderRadius: '9999px', fontSize: '0.85rem', color: '#fff', fontWeight: '600', marginBottom: '2rem' }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', padding: '0.5rem 1.25rem', borderRadius: '9999px', fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: '600', marginBottom: '2rem' }}>
               <Sparkles size={14} className="floating-element" style={{ color: '#c084fc' }} /> AI-Powered Career Suite
             </div>
             
-            <h1 style={{ fontSize: '3.6rem', fontWeight: '800', lineHeight: '1.15', letterSpacing: '-0.03em', marginBottom: '1.5rem', color: '#ffffff' }}>
+            <h1 style={{ fontSize: '3.6rem', fontWeight: '800', lineHeight: '1.15', letterSpacing: '-0.03em', marginBottom: '1.5rem', color: 'var(--text-main)' }}>
               Apply smarter.<br />
               <span style={{ background: 'linear-gradient(135deg, #f472b6, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                 Get hired faster.
@@ -124,7 +125,7 @@ export default function LandingPage({ onLaunchWorkspace }) {
                 ))}
               </div>
               <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>
-                ⭐ <strong style={{ color: '#fff' }}>1,000+</strong> resumes built this week
+                ⭐ <strong style={{ color: 'var(--text-main)' }}>1,000+</strong> resumes built this week
               </div>
             </div>
 
@@ -132,93 +133,10 @@ export default function LandingPage({ onLaunchWorkspace }) {
         </div>
 
         {/* Right Side: Light Mockup/Preview Panel */}
-        <div className="hero-landing-mockup">
+        <div className="hero-landing-mockup" style={{ zIndex: 10 }}>
           <div style={{ position: 'absolute', top: '20%', right: '10%', width: '250px', height: '250px', background: 'rgba(139,92,246,0.06)', filter: 'blur(70px)', borderRadius: '50%', pointerEvents: 'none' }} />
-          
-          <div className="mockup-container floating-element" style={{ animationDuration: '6s' }}>
-            <div className="mockup-header">
-              <div className="mockup-dot" style={{ background: '#ef4444' }} />
-              <div className="mockup-dot" style={{ background: '#f59e0b' }} />
-              <div className="mockup-dot" style={{ background: '#10b981' }} />
-              <span style={{ fontSize: '0.75rem', color: '#94a3b8', marginLeft: '1rem', fontFamily: 'monospace' }}>resumemaster.online/builder</span>
-            </div>
-            
-            <div className="mockup-body">
-              {/* Form Input fields */}
-              <div className="mockup-left">
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <label style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#64748b' }}>FULL NAME</label>
-                  <div className="mockup-field" style={{ fontWeight: 'bold' }}>Jane Doe</div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <label style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#64748b' }}>JOB TITLE</label>
-                  <div className="mockup-field">Senior Frontend Engineer</div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
-                  <label style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#64748b' }}>EXPERIENCE BULLET</label>
-                  <div className="mockup-field" style={{ height: '70px', overflow: 'hidden', border: isPolishing ? '1.5px solid #8b5cf6' : '1px solid #cbd5e1', transition: 'border-color 0.3s' }}>
-                    {mockBulletText}
-                  </div>
-                </div>
-                <button style={{
-                  background: isPolishing ? '#d8b4fe' : '#8b5cf6',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '0.375rem',
-                  padding: '0.5rem',
-                  fontSize: '0.75rem',
-                  fontWeight: 'bold',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  cursor: 'pointer',
-                  transition: 'background-color 0.3s'
-                }}>
-                  <Wand2 size={12} /> {isPolishing ? "AI is Polishing..." : "AI Google XYZ Rewrite"}
-                </button>
-              </div>
-
-              {/* Dynamic live PDF sheet rendering */}
-              <div className="mockup-right">
-                {isPolishing && (
-                  <div style={{
-                    position: 'absolute',
-                    inset: 0,
-                    background: 'rgba(255,255,255,0.85)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem',
-                    zIndex: 10
-                  }}>
-                    <Sparkles size={24} style={{ color: '#8b5cf6', animation: 'spin 1.5s linear infinite' }} />
-                    <span style={{ fontSize: '0.75rem', fontWeight: 'bold', color: '#8b5cf6' }}>Optimizing metrics & impact...</span>
-                  </div>
-                )}
-                
-                <div style={{ textAlign: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '0.5rem', marginBottom: '0.75rem' }}>
-                  <div style={{ fontSize: '0.95rem', fontWeight: 'bold', color: '#0f172a' }}>Jane Doe</div>
-                  <div style={{ fontSize: '0.65rem', color: '#64748b' }}>San Francisco, CA | jane.doe@example.com</div>
-                </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                  <div style={{ fontSize: '0.7rem', fontWeight: 'bold', color: '#8b5cf6', borderBottom: '1px solid #8b5cf6', paddingBottom: '1px' }}>PROFESSIONAL EXPERIENCE</div>
-                  
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', fontWeight: 'bold', color: '#1e293b' }}>
-                      <span>TechCorp Solutions</span>
-                      <span>Jan 2021 – Present</span>
-                    </div>
-                    <div style={{ fontSize: '0.65rem', italic: 'true', color: '#64748b' }}>Senior Software Engineer</div>
-                    <div style={{ fontSize: '0.65rem', color: '#334155', marginTop: '0.25rem', lineHeight: '1.4', background: polishStep === 1 ? '#faf5ff' : 'transparent', padding: '0.25rem', borderRadius: '4px', transition: 'background-color 0.5s' }}>
-                      {mockBulletText}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div style={{ transform: 'translateY(-3rem)', width: '100%', display: 'flex', justifyContent: 'center', transition: 'all 0.3s ease' }}>
+            <ResumeTemplateSlider />
           </div>
         </div>
       </section>
@@ -245,15 +163,15 @@ export default function LandingPage({ onLaunchWorkspace }) {
               <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(139, 92, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-primary)', marginBottom: '1.5rem' }}>
                 <Zap size={24} />
               </div>
-              <h3 style={{ fontSize: '1.5rem', color: '#fff', marginBottom: '0.75rem' }}>AI Resume Builder</h3>
+              <h3 style={{ fontSize: '1.5rem', color: 'var(--text-main)', marginBottom: '0.75rem' }}>AI Resume Builder</h3>
               <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '1.5rem' }}>
                 Construct print-ready PDF resumes. Swap templates instantly (Serif, Minimalist, Technical) and auto-optimize bullet points using Google's metrics formula.
               </p>
               <ul style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', listStyle: 'none', padding: 0 }}>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#fff' }}><Check size={14} color="var(--color-success)" /> Print-Ready Templates</li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#fff' }}><Check size={14} color="var(--color-success)" /> Metric XYZ Optimizer</li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#fff' }}><Check size={14} color="var(--color-success)" /> Live Preview Swap</li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#fff' }}><Check size={14} color="var(--color-success)" /> Clean Font Control</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-main)' }}><Check size={14} color="var(--color-success)" /> Print-Ready Templates</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-main)' }}><Check size={14} color="var(--color-success)" /> Metric XYZ Optimizer</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-main)' }}><Check size={14} color="var(--color-success)" /> Live Preview Swap</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-main)' }}><Check size={14} color="var(--color-success)" /> Clean Font Control</li>
               </ul>
             </div>
             <div style={{ marginTop: '2rem', fontSize: '0.8rem', color: 'var(--color-primary-hover)', fontWeight: 'bold' }}>
@@ -267,7 +185,7 @@ export default function LandingPage({ onLaunchWorkspace }) {
               <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(236, 72, 153, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-secondary)', marginBottom: '1.5rem' }}>
                 <Flame size={24} />
               </div>
-              <h3 style={{ fontSize: '1.3rem', color: '#fff', marginBottom: '0.75rem' }}>Tinder Matcher</h3>
+              <h3 style={{ fontSize: '1.3rem', color: 'var(--text-main)', marginBottom: '0.75rem' }}>Tinder Matcher</h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
                 Swipe through tech postings to check real-time ATS keyword compatibility scores and find matching roles instantly.
               </p>
@@ -283,7 +201,7 @@ export default function LandingPage({ onLaunchWorkspace }) {
               <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-accent)', marginBottom: '1.5rem' }}>
                 <ListChecks size={24} />
               </div>
-              <h3 style={{ fontSize: '1.3rem', color: '#fff', marginBottom: '0.75rem' }}>Kanban Tracker</h3>
+              <h3 style={{ fontSize: '1.3rem', color: 'var(--text-main)', marginBottom: '0.75rem' }}>Kanban Tracker</h3>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', lineHeight: '1.5' }}>
                 Track applications on an elegant drag-and-drop workflow board from target leads up to final job offers.
               </p>
@@ -299,15 +217,15 @@ export default function LandingPage({ onLaunchWorkspace }) {
               <div style={{ width: '48px', height: '48px', borderRadius: '12px', background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-success)', marginBottom: '1.5rem' }}>
                 <PenTool size={24} />
               </div>
-              <h3 style={{ fontSize: '1.5rem', color: '#fff', marginBottom: '0.75rem' }}>AI Career Copilot</h3>
+              <h3 style={{ fontSize: '1.5rem', color: 'var(--text-main)', marginBottom: '0.75rem' }}>AI Career Copilot</h3>
               <p style={{ fontSize: '0.95rem', color: 'var(--text-muted)', lineHeight: '1.6', marginBottom: '1.5rem' }}>
                 Write tailored cover letters based on target job descriptions, prepare for live technical interviews with predictive mock question simulators, and boost LinkedIn SEO search results.
               </p>
               <ul style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', listStyle: 'none', padding: 0 }}>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#fff' }}><Check size={14} color="var(--color-success)" /> Mock Interview Simulator</li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#fff' }}><Check size={14} color="var(--color-success)" /> Custom AI Cover Letters</li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#fff' }}><Check size={14} color="var(--color-success)" /> LinkedIn Summary Generator</li>
-                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: '#fff' }}><Check size={14} color="var(--color-success)" /> Key Terms Identifier</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-main)' }}><Check size={14} color="var(--color-success)" /> Mock Interview Simulator</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-main)' }}><Check size={14} color="var(--color-success)" /> Custom AI Cover Letters</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-main)' }}><Check size={14} color="var(--color-success)" /> LinkedIn Summary Generator</li>
+                <li style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.85rem', color: 'var(--text-main)' }}><Check size={14} color="var(--color-success)" /> Key Terms Identifier</li>
               </ul>
             </div>
             <div style={{ marginTop: '2rem', fontSize: '0.8rem', color: '#10b981', fontWeight: 'bold' }}>
@@ -337,7 +255,7 @@ export default function LandingPage({ onLaunchWorkspace }) {
               <div className={`workflow-interactive-tab ${activeStep === 0 ? 'active' : ''}`} onClick={() => setActiveStep(0)}>
                 <div className="workflow-step-num">1</div>
                 <div>
-                  <h4 style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '0.4rem' }}>Create or Import Experience</h4>
+                  <h4 style={{ color: 'var(--text-main)', fontSize: '1.1rem', marginBottom: '0.4rem' }}>Create or Import Experience</h4>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
                     Type your details directly into our clean editor, or drop in your existing PDF CV. Gemini extracts your structured education, projects, and skills.
                   </p>
@@ -347,7 +265,7 @@ export default function LandingPage({ onLaunchWorkspace }) {
               <div className={`workflow-interactive-tab ${activeStep === 1 ? 'active' : ''}`} onClick={() => setActiveStep(1)}>
                 <div className="workflow-step-num">2</div>
                 <div>
-                  <h4 style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '0.4rem' }}>AI Bullet & Keyword Analysis</h4>
+                  <h4 style={{ color: 'var(--text-main)', fontSize: '1.1rem', marginBottom: '0.4rem' }}>AI Bullet & Keyword Analysis</h4>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
                     Trigger Google's metrics formula to re-format accomplishments. Check keywords against target postings to generate optimized diagnostic scores.
                   </p>
@@ -357,7 +275,7 @@ export default function LandingPage({ onLaunchWorkspace }) {
               <div className={`workflow-interactive-tab ${activeStep === 2 ? 'active' : ''}`} onClick={() => setActiveStep(2)}>
                 <div className="workflow-step-num">3</div>
                 <div>
-                  <h4 style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '0.4rem' }}>Manage Pipeline & Apply</h4>
+                  <h4 style={{ color: 'var(--text-main)', fontSize: '1.1rem', marginBottom: '0.4rem' }}>Manage Pipeline & Apply</h4>
                   <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
                     Organize submissions, log interviews, and export print-ready resumes. Use the Copilot tab to build cover letters.
                   </p>
@@ -465,14 +383,14 @@ export default function LandingPage({ onLaunchWorkspace }) {
               </div>
               <span style={{ fontSize: '0.75rem', background: 'rgba(16,185,129,0.1)', color: '#10b981', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>VERIFIED USER</span>
             </div>
-            <h4 style={{ color: '#fff', fontSize: '1.05rem', marginBottom: '0.5rem' }}>"Landed a job at Vercel!"</h4>
+            <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.5rem' }}>"Landed a job at Vercel!"</h4>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: '1.6' }}>
               "The AI Bullet writer translated my simple project notes into metrics-focused XYZ achievements. My response rate rose significantly."
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
               <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="Alex Mercer" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
               <div>
-                <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.85rem' }}>Alex Mercer</div>
+                <div style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '0.85rem' }}>Alex Mercer</div>
                 <div style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>Frontend Developer @ Vercel</div>
               </div>
             </div>
@@ -485,14 +403,14 @@ export default function LandingPage({ onLaunchWorkspace }) {
               </div>
               <span style={{ fontSize: '0.75rem', background: 'rgba(16,185,129,0.1)', color: '#10b981', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>VERIFIED USER</span>
             </div>
-            <h4 style={{ color: '#fff', fontSize: '1.05rem', marginBottom: '0.5rem' }}>"ATS diagnostic is a game changer"</h4>
+            <h4 style={{ color: 'var(--text-main)', fontSize: '1.05rem', marginBottom: '0.5rem' }}>"ATS diagnostic is a game changer"</h4>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: '1.6' }}>
               "The Tinder-style matcher is addictive. It highlighted missing keywords on my CV, letting me tailor descriptions before applying."
             </p>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1rem' }}>
               <img src="https://randomuser.me/api/portraits/women/44.jpg" alt="Sarah Jenkins" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
               <div>
-                <div style={{ fontWeight: 'bold', color: '#fff', fontSize: '0.85rem' }}>Sarah Jenkins</div>
+                <div style={{ fontWeight: 'bold', color: 'var(--text-main)', fontSize: '0.85rem' }}>Sarah Jenkins</div>
                 <div style={{ color: 'var(--text-dim)', fontSize: '0.75rem' }}>Cloud Engineer @ Cloudflare</div>
               </div>
             </div>
@@ -514,8 +432,8 @@ export default function LandingPage({ onLaunchWorkspace }) {
             {/* Free plan */}
             <div className="bento-card pricing-card-free" style={{ padding: '2.5rem 2.25rem' }}>
               <div>
-                <h4 style={{ fontSize: '1.2rem', color: '#fff', marginBottom: '0.5rem' }}>Basic</h4>
-                <div style={{ fontSize: '2.25rem', fontWeight: '800', color: '#fff', marginBottom: '1.5rem' }}>
+                <h4 style={{ fontSize: '1.2rem', color: 'var(--text-main)', marginBottom: '0.5rem' }}>Basic</h4>
+                <div style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
                   $0 <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)', fontWeight: 'normal' }}>/ forever</span>
                 </div>
                 <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', listStyle: 'none', padding: 0 }}>
@@ -531,18 +449,18 @@ export default function LandingPage({ onLaunchWorkspace }) {
             <div className="bento-card pricing-card-pro" style={{ padding: '2.5rem 2.25rem' }}>
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                  <h4 style={{ fontSize: '1.2rem', color: '#fff' }}>Pro</h4>
+                  <h4 style={{ fontSize: '1.2rem', color: 'var(--text-main)' }}>Pro</h4>
                   <span className="pricing-badge-pro">RECOMMENDED</span>
                 </div>
-                <div style={{ fontSize: '2.25rem', fontWeight: '800', color: '#fff', marginBottom: '1.5rem' }}>
+                <div style={{ fontSize: '2.25rem', fontWeight: '800', color: 'var(--text-main)', marginBottom: '1.5rem' }}>
                   $12 <span style={{ fontSize: '0.9rem', color: 'rgba(255,255,255,0.6)', fontWeight: 'normal' }}>/ month</span>
                 </div>
                 <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', listStyle: 'none', padding: 0 }}>
-                  <li style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}><Check size={16} color="#c084fc" /> Unlimited Resumes</li>
-                  <li style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}><Check size={16} color="#c084fc" /> Google X-Y-Z AI Bullet Enhancer</li>
-                  <li style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}><Check size={16} color="#c084fc" /> Tinder-style Swiper Diagnostics</li>
-                  <li style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}><Check size={16} color="#c084fc" /> Custom Cover Letters & LinkedIn SEO</li>
-                  <li style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#fff' }}><Check size={16} color="#c084fc" /> Mock Interview Preparation</li>
+                  <li style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}><Check size={16} color="#c084fc" /> Unlimited Resumes</li>
+                  <li style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}><Check size={16} color="#c084fc" /> Google X-Y-Z AI Bullet Enhancer</li>
+                  <li style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}><Check size={16} color="#c084fc" /> Tinder-style Swiper Diagnostics</li>
+                  <li style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}><Check size={16} color="#c084fc" /> Custom Cover Letters & LinkedIn SEO</li>
+                  <li style={{ fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}><Check size={16} color="#c084fc" /> Mock Interview Preparation</li>
                 </ul>
               </div>
               <button className="btn-primary" style={{ width: '100%', marginTop: '2rem' }} onClick={onLaunchWorkspace}>Upgrade to Pro</button>
@@ -562,7 +480,7 @@ export default function LandingPage({ onLaunchWorkspace }) {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           {FAQS.map((faq, idx) => (
             <div key={idx} className="glass-card" style={{ padding: '1.25rem', cursor: 'pointer' }} onClick={() => toggleFaq(idx)}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold', color: '#fff', fontSize: '1rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontWeight: 'bold', color: 'var(--text-main)', fontSize: '1rem' }}>
                 <span>{faq.q}</span>
                 <span style={{ fontSize: '1.2rem', color: 'var(--color-primary-hover)' }}>{activeFaq === idx ? '−' : '+'}</span>
               </div>
@@ -582,7 +500,7 @@ export default function LandingPage({ onLaunchWorkspace }) {
           
           {/* Brand Info */}
           <div className="footer-column">
-            <a href="#" style={{ fontSize: '1.4rem', fontWeight: '800', color: '#fff', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <a href="#" style={{ fontSize: '1.4rem', fontWeight: '800', color: 'var(--text-main)', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               Resume<span className="logo-highlight">Master</span>
             </a>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', lineHeight: '1.6' }}>

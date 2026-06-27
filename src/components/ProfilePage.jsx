@@ -117,7 +117,7 @@ export default function ProfilePage({ user, token, resumeData, onNavigate, onGoS
               background: 'rgba(255,255,255,0.1)',
               border: '1px solid rgba(255,255,255,0.2)',
               borderRadius: '0.5rem',
-              color: '#fff', cursor: 'pointer',
+              color: 'var(--text-main)', cursor: 'pointer',
               padding: '0.4rem 0.8rem',
               fontSize: '0.8rem', fontWeight: 600,
               display: 'flex', alignItems: 'center', gap: '0.4rem',
@@ -144,7 +144,7 @@ export default function ProfilePage({ user, token, resumeData, onNavigate, onGoS
             background: 'linear-gradient(135deg, #4f46e5, #8b5cf6, #ec4899)',
             border: '4px solid rgba(14,12,28,0.95)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '2rem', fontWeight: 900, color: '#fff',
+            fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)',
             marginTop: -48, flexShrink: 0,
             boxShadow: '0 0 0 2px rgba(139,92,246,0.4), 0 8px 24px rgba(0,0,0,0.4)',
           }}>
@@ -154,7 +154,7 @@ export default function ProfilePage({ user, token, resumeData, onNavigate, onGoS
           {/* Name & meta */}
           <div style={{ flex: 1, paddingTop: '1.25rem', minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '0.35rem' }}>
-              <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: '#fff', margin: 0 }}>
+              <h1 style={{ fontSize: '1.6rem', fontWeight: 900, color: 'var(--text-main)', margin: 0 }}>
                 {user?.fullName}
               </h1>
               <span style={{
@@ -217,7 +217,7 @@ export default function ProfilePage({ user, token, resumeData, onNavigate, onGoS
         {/* Resume Summary */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <FileText size={16} style={{ color: '#10b981' }} /> Current Resume
             </h3>
             <button
@@ -229,7 +229,7 @@ export default function ProfilePage({ user, token, resumeData, onNavigate, onGoS
           </div>
 
           <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: '0.75rem', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-            <div style={{ fontSize: '1rem', fontWeight: 700, color: '#fff' }}>{resumeData?.personalInfo?.fullName || 'Untitled'}</div>
+            <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-main)' }}>{resumeData?.personalInfo?.fullName || 'Untitled'}</div>
             <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{resumeData?.personalInfo?.title || 'No title set'}</div>
             <div style={{ display: 'flex', gap: '1rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
               {[
@@ -238,7 +238,7 @@ export default function ProfilePage({ user, token, resumeData, onNavigate, onGoS
                 { label: 'Projects',    val: resumeData?.projects?.length || 0 },
               ].map(({ label, val }) => (
                 <div key={label} style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#fff' }}>{val}</div>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--text-main)' }}>{val}</div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{label}</div>
                 </div>
               ))}
@@ -261,7 +261,7 @@ export default function ProfilePage({ user, token, resumeData, onNavigate, onGoS
 
         {/* Recent Activity */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-          <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: '#fff', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <h3 style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Clock size={16} style={{ color: 'var(--color-primary)' }} /> Recent Activity
           </h3>
 
