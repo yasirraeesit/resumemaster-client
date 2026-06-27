@@ -244,9 +244,9 @@ export default function App() {
   const [token,      setToken]      = useState(() => localStorage.getItem('token') || '');
   const [user,       setUser]       = useState(() => JSON.parse(localStorage.getItem('user') || 'null'));
   const [view,       setView]       = useState(() => {
-    const savedToken = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
     const savedView = localStorage.getItem('view');
-    if (savedToken) {
+    if (savedUser) {
       return savedView || 'workspace';
     }
     return 'landing';
