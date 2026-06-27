@@ -1379,6 +1379,26 @@ p {
   background: rgba(0, 0, 0, 0.02);
 }
 
+/* Custom keyframes for futuristic resume parsing modal */
+@keyframes scanLaser {
+  0% { top: 0%; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@keyframes progressPulse {
+  0% { transform: scaleX(0.1); transform-origin: left; }
+  50% { transform: scaleX(0.85); transform-origin: left; }
+  100% { transform: scaleX(1); transform-origin: left; }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+
 
 
 
