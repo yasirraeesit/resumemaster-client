@@ -275,6 +275,23 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
     });
   };
 
+  const moveArrayItem = (section, index, direction) => {
+    setResumeData(prev => {
+      const arr = [...(prev[section] || [])];
+      const newIndex = direction === 'up' ? index - 1 : index + 1;
+      if (newIndex < 0 || newIndex >= arr.length) return prev;
+      
+      const temp = arr[index];
+      arr[index] = arr[newIndex];
+      arr[newIndex] = temp;
+      
+      return {
+        ...prev,
+        [section]: arr
+      };
+    });
+  };
+
   const handleSkillsChange = (e) => {
     const list = e.target.value.split(',').map(s => s.trim());
     setResumeData(prev => ({
@@ -924,9 +941,29 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   <input className="form-input" style={{ flex: 1 }} placeholder="Company" value={exp.company || ''} onChange={(e) => handleArrayFieldChange('experience', idx, 'company', e.target.value)} />
                   <input className="form-input" style={{ flex: 1 }} placeholder="Role" value={exp.role || ''} onChange={(e) => handleArrayFieldChange('experience', idx, 'role', e.target.value)} />
-                  <button className="btn-secondary" style={{ padding: '0.5rem', color: 'var(--color-danger)' }} onClick={() => removeArrayItem('experience', idx)}>
-                    <Trash2 size={16} />
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.2rem' }}>
+                    <button
+                      className="btn-secondary"
+                      style={{ padding: '0.5rem', opacity: idx === 0 ? 0.35 : 1, cursor: idx === 0 ? 'not-allowed' : 'pointer' }}
+                      disabled={idx === 0}
+                      onClick={() => moveArrayItem('experience', idx, 'up')}
+                      title="Move Up"
+                    >
+                      ▲
+                    </button>
+                    <button
+                      className="btn-secondary"
+                      style={{ padding: '0.5rem', opacity: idx === resumeData.experience.length - 1 ? 0.35 : 1, cursor: idx === resumeData.experience.length - 1 ? 'not-allowed' : 'pointer' }}
+                      disabled={idx === resumeData.experience.length - 1}
+                      onClick={() => moveArrayItem('experience', idx, 'down')}
+                      title="Move Down"
+                    >
+                      ▼
+                    </button>
+                    <button className="btn-secondary" style={{ padding: '0.5rem', color: 'var(--color-danger)' }} onClick={() => removeArrayItem('experience', idx)}>
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   <input className="form-input" style={{ flex: 1 }} placeholder="Start Date" value={exp.startDate || ''} onChange={(e) => handleArrayFieldChange('experience', idx, 'startDate', e.target.value)} />
@@ -961,9 +998,29 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   <input className="form-input" style={{ flex: 1 }} placeholder="School" value={edu.school || ''} onChange={(e) => handleArrayFieldChange('education', idx, 'school', e.target.value)} />
                   <input className="form-input" style={{ flex: 1 }} placeholder="Degree & Major" value={edu.degree || ''} onChange={(e) => handleArrayFieldChange('education', idx, 'degree', e.target.value)} />
-                  <button className="btn-secondary" style={{ padding: '0.5rem', color: 'var(--color-danger)' }} onClick={() => removeArrayItem('education', idx)}>
-                    <Trash2 size={16} />
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.2rem' }}>
+                    <button
+                      className="btn-secondary"
+                      style={{ padding: '0.5rem', opacity: idx === 0 ? 0.35 : 1, cursor: idx === 0 ? 'not-allowed' : 'pointer' }}
+                      disabled={idx === 0}
+                      onClick={() => moveArrayItem('education', idx, 'up')}
+                      title="Move Up"
+                    >
+                      ▲
+                    </button>
+                    <button
+                      className="btn-secondary"
+                      style={{ padding: '0.5rem', opacity: idx === resumeData.education.length - 1 ? 0.35 : 1, cursor: idx === resumeData.education.length - 1 ? 'not-allowed' : 'pointer' }}
+                      disabled={idx === resumeData.education.length - 1}
+                      onClick={() => moveArrayItem('education', idx, 'down')}
+                      title="Move Down"
+                    >
+                      ▼
+                    </button>
+                    <button className="btn-secondary" style={{ padding: '0.5rem', color: 'var(--color-danger)' }} onClick={() => removeArrayItem('education', idx)}>
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <input className="form-input" style={{ flex: 1 }} placeholder="Start Date" value={edu.startDate || ''} onChange={(e) => handleArrayFieldChange('education', idx, 'startDate', e.target.value)} />
@@ -989,9 +1046,29 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                 <div style={{ display: 'flex', justifyContent: 'space-between', gap: '0.5rem', marginBottom: '0.5rem' }}>
                   <input className="form-input" style={{ flex: 1 }} placeholder="Project Name" value={proj.name || ''} onChange={(e) => handleArrayFieldChange('projects', idx, 'name', e.target.value)} />
                   <input className="form-input" style={{ flex: 1 }} placeholder="Project URL" value={proj.url || ''} onChange={(e) => handleArrayFieldChange('projects', idx, 'url', e.target.value)} />
-                  <button className="btn-secondary" style={{ padding: '0.5rem', color: 'var(--color-danger)' }} onClick={() => removeArrayItem('projects', idx)}>
-                    <Trash2 size={16} />
-                  </button>
+                  <div style={{ display: 'flex', gap: '0.2rem' }}>
+                    <button
+                      className="btn-secondary"
+                      style={{ padding: '0.5rem', opacity: idx === 0 ? 0.35 : 1, cursor: idx === 0 ? 'not-allowed' : 'pointer' }}
+                      disabled={idx === 0}
+                      onClick={() => moveArrayItem('projects', idx, 'up')}
+                      title="Move Up"
+                    >
+                      ▲
+                    </button>
+                    <button
+                      className="btn-secondary"
+                      style={{ padding: '0.5rem', opacity: idx === resumeData.projects.length - 1 ? 0.35 : 1, cursor: idx === resumeData.projects.length - 1 ? 'not-allowed' : 'pointer' }}
+                      disabled={idx === resumeData.projects.length - 1}
+                      onClick={() => moveArrayItem('projects', idx, 'down')}
+                      title="Move Down"
+                    >
+                      ▼
+                    </button>
+                    <button className="btn-secondary" style={{ padding: '0.5rem', color: 'var(--color-danger)' }} onClick={() => removeArrayItem('projects', idx)}>
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 </div>
                 <div className="form-group" style={{ margin: 0 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
@@ -1063,9 +1140,9 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
 
       {/* RIGHT: Live Printable Preview Pane */}
       <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 130px)' }}>
-        <div className="glass-card" style={{ padding: '0.75rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderRadius: '0.75rem' }}>
-          <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Template Layout:</span>
+        <div className="glass-card" style={{ padding: '0.75rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1rem', borderRadius: '0.75rem' }}>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Template Layout:</span>
             <select className="form-select" style={{ padding: '0.3rem 1.5rem 0.3rem 0.75rem', fontSize: '0.8rem', background: 'rgba(255,255,255,0.05)', color: 'var(--text-main)', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer' }} value={selectedTemplate} onChange={(e) => setSelectedTemplate(e.target.value)}>
               <option value="elegant"   style={{ background: '#121020', color: 'var(--text-main)' }}>Elegant Serif</option>
               <option value="modern"    style={{ background: '#121020', color: 'var(--text-main)' }}>Modern Minimalist</option>
@@ -1073,6 +1150,39 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
               <option value="executive" style={{ background: '#121020', color: 'var(--text-main)' }}>Executive Two-Column</option>
               <option value="creative"  style={{ background: '#121020', color: 'var(--text-main)' }}>Creative Gradient</option>
             </select>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            {/* Color Accent Presets */}
+            <div style={{ display: 'flex', gap: '0.35rem', alignItems: 'center' }}>
+              {[
+                { hex: '#0f172a', name: 'Charcoal' },
+                { hex: '#3b82f6', name: 'Blue' },
+                { hex: '#10b981', name: 'Emerald' },
+                { hex: '#6d28d9', name: 'Purple' },
+                { hex: '#ec4899', name: 'Rose' },
+                { hex: '#991b1b', name: 'Burgundy' }
+              ].map(color => (
+                <button
+                  key={color.hex}
+                  onClick={() => setLayoutSettings(prev => ({ ...prev, accentColor: color.hex }))}
+                  style={{
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    background: color.hex,
+                    border: layoutSettings.accentColor === color.hex ? '2px solid #fff' : '1px solid rgba(255,255,255,0.2)',
+                    boxShadow: layoutSettings.accentColor === color.hex ? `0 0 6px ${color.hex}` : 'none',
+                    cursor: 'pointer',
+                    padding: 0,
+                    transition: 'all 0.15s ease',
+                    transform: layoutSettings.accentColor === color.hex ? 'scale(1.15)' : 'scale(1)'
+                  }}
+                  title={color.name}
+                />
+              ))}
+            </div>
+
             <button 
               className="btn-secondary" 
               style={{ 
@@ -1145,36 +1255,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                 />
               </div>
 
-              {/* Accent Color picker */}
-              <div className="form-group" style={{ margin: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <label className="form-label" style={{ fontSize: '0.78rem', marginBottom: '0.35rem' }}>Accent Theme Color</label>
-                <div style={{ display: 'flex', gap: '0.45rem', alignItems: 'center' }}>
-                  {[
-                    { hex: '#3b82f6', name: 'Indigo' },
-                    { hex: '#10b981', name: 'Emerald' },
-                    { hex: '#6d28d9', name: 'Purple' },
-                    { hex: '#ec4899', name: 'Rose' },
-                    { hex: '#0f172a', name: 'Slate' }
-                  ].map(color => (
-                    <button
-                      key={color.hex}
-                      onClick={() => setLayoutSettings(prev => ({ ...prev, accentColor: color.hex }))}
-                      style={{
-                        width: '22px',
-                        height: '22px',
-                        borderRadius: '50%',
-                        background: color.hex,
-                        border: layoutSettings.accentColor === color.hex ? '2px solid #fff' : '1px solid rgba(255,255,255,0.15)',
-                        boxShadow: layoutSettings.accentColor === color.hex ? '0 0 8px rgba(139,92,246,0.6)' : 'none',
-                        cursor: 'pointer',
-                        padding: 0,
-                        transition: 'all 0.15s ease'
-                      }}
-                      title={color.name}
-                    />
-                  ))}
-                </div>
-              </div>
+
 
             </div>
           </div>
