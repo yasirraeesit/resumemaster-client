@@ -527,10 +527,10 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', minHeight: '80vh' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', minHeight: 'calc(100vh - 180px)' }}>
       
       {/* LEFT: Builder Form Panel */}
-      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: '82vh', overflowY: 'auto' }}>
+      <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxHeight: 'calc(100vh - 160px)', overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontSize: '1.4rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <FileText size={22} className="logo-highlight" />
@@ -986,7 +986,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
       </div>
 
       {/* RIGHT: Live Printable Preview Pane */}
-      <div style={{ overflowY: 'auto', maxHeight: '82vh' }}>
+      <div style={{ overflowY: 'auto', maxHeight: 'calc(100vh - 160px)' }}>
         <div className="glass-card" style={{ padding: '0.75rem 1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderRadius: '0.75rem' }}>
           <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', fontWeight: 'bold' }}>Template Layout:</span>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>

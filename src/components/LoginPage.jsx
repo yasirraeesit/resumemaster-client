@@ -17,7 +17,7 @@ export default function LoginPage({ onBack, onAuthSuccess, onGuestLogin, onNavig
         });
         window.google.accounts.id.renderButton(
           document.getElementById('google-signin-btn'),
-          { theme: 'outline', size: 'large', width: '400' }
+          { theme: 'outline', size: 'large', width: '380' }
         );
       } catch (e) {
         console.error('Google accounts SDK initialize error:', e);
@@ -81,7 +81,7 @@ export default function LoginPage({ onBack, onAuthSuccess, onGuestLogin, onNavig
     <div style={{
       display: 'grid',
       gridTemplateColumns: '1fr 1.1fr',
-      minHeight: '680px',
+      minHeight: '88vh',
       background: 'var(--bg-app)',
       color: 'var(--text-main)',
       borderRadius: '1.25rem',
