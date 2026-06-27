@@ -18,7 +18,7 @@ export default function RegisterPage({ onBack, onAuthSuccess, onGuestLogin, onNa
         });
         window.google.accounts.id.renderButton(
           document.getElementById('google-signup-btn'),
-          { theme: 'outline', size: 'large', width: '380' }
+          { theme: 'outline', size: 'large', width: '400' }
         );
       } catch (e) {
         console.error('Google accounts SDK initialize error:', e);
@@ -82,7 +82,7 @@ export default function RegisterPage({ onBack, onAuthSuccess, onGuestLogin, onNa
     <div style={{
       display: 'grid',
       gridTemplateColumns: '1fr 1.1fr',
-      minHeight: '88vh',
+      minHeight: '680px',
       background: 'var(--bg-app)',
       color: 'var(--text-main)',
       borderRadius: '1.25rem',
