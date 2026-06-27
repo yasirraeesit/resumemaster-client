@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, LogIn, ChevronLeft, ShieldCheck, Mail, Lock } from 'lucide-react';
 
-export default function LoginPage({ onBack, onAuthSuccess, onNavigateToRegister }) {
+export default function LoginPage({ onBack, onAuthSuccess, onGuestLogin, onNavigateToRegister }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -231,6 +231,19 @@ export default function LoginPage({ onBack, onAuthSuccess, onNavigateToRegister 
               textDecoration: 'underline'
             }} onClick={onNavigateToRegister}>
               Create Account
+            </button>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: '1rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+            <button style={{
+              background: 'transparent',
+              border: 'none',
+              color: 'var(--text-dim)',
+              fontWeight: 500,
+              cursor: 'pointer',
+              textDecoration: 'underline'
+            }} onClick={onGuestLogin}>
+              Continue as Guest (No login required)
             </button>
           </div>
         </div>

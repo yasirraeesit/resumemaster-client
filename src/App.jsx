@@ -328,6 +328,16 @@ export default function App() {
     localStorage.setItem('user', JSON.stringify(u));
   };
 
+  const handleGuestLogin = () => {
+    const guestUser = { id: 'guest', fullName: 'Guest User', email: 'guest@resumemaster.online' };
+    setUser(guestUser);
+    setToken('');
+    localStorage.setItem('user', JSON.stringify(guestUser));
+    localStorage.removeItem('token');
+    setView('workspace');
+    setActiveTab('builder');
+  };
+
   /* ── Auth pages ─────────────────────────────────────────────────── */
   if (view === 'login') {
     return (
@@ -336,6 +346,7 @@ export default function App() {
           <LoginPage
             onBack={goToLanding}
             onAuthSuccess={handleAuthSuccess}
+            onGuestLogin={handleGuestLogin}
             onNavigateToRegister={() => setView('register')}
           />
         </main>
@@ -350,12 +361,14 @@ export default function App() {
           <RegisterPage
             onBack={goToLanding}
             onAuthSuccess={handleAuthSuccess}
+            onGuestLogin={handleGuestLogin}
             onNavigateToLogin={() => setView('login')}
           />
         </main>
       </ToastProvider>
     );
   }
+
 
   const headerProps = {
     user, darkMode, toggleTheme,
