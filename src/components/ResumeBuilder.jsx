@@ -538,10 +538,18 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
           </h2>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
             {/* Left side actions */}
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
               <button className="btn-secondary" style={{ padding: '0.45rem 0.85rem', fontSize: '0.82rem' }} onClick={handleSave}>
                 <Save size={15} /> Save
               </button>
+              <button
+                className="btn-secondary"
+                style={{ padding: '0.45rem 0.85rem', fontSize: '0.82rem', color: '#3b82f6', borderColor: 'rgba(59,130,246,0.25)', background: 'rgba(59,130,246,0.05)' }}
+                onClick={() => document.getElementById('resume-pdf-import-input').click()}
+              >
+                ⚡ Import PDF
+              </button>
+              <input id="resume-pdf-import-input" type="file" accept=".pdf" onChange={handleImportPDF} style={{ display: 'none' }} />
               <button className="btn-primary" style={{ padding: '0.45rem 0.9rem', fontSize: '0.82rem', opacity: pdfExporting ? 0.7 : 1 }} onClick={handleDownloadPDF} disabled={pdfExporting}>
                 <Download size={15} /> {pdfExporting ? 'Exporting...' : 'Export PDF'}
               </button>
@@ -635,16 +643,23 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
           </div>
         )}
 
-        {/* Quick Import Widget */}
-        <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px dashed rgba(255,255,255,0.1)', padding: '1rem', borderRadius: '0.75rem' }}>
-          <label style={{ cursor: 'pointer', display: 'block', textAlign: 'center' }}>
-            <span style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-              ⚡ <strong>Import Existing PDF:</strong> Click to upload resume for automated parsing
-            </span>
-            <input type="file" accept=".pdf" onChange={handleImportPDF} style={{ display: 'none' }} />
-          </label>
-          {parsingStatus && <div style={{ fontSize: '0.85rem', color: 'var(--color-secondary)', marginTop: '0.5rem', textAlign: 'center' }}>{parsingStatus}</div>}
-        </div>
+        {parsingStatus && (
+          <div style={{
+            background: 'rgba(59,130,246,0.08)',
+            border: '1px dashed rgba(59,130,246,0.25)',
+            color: '#60a5fa',
+            padding: '0.75rem 1rem',
+            borderRadius: '0.65rem',
+            fontSize: '0.82rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.65rem',
+            animation: 'tabFadeIn 0.25s ease'
+          }}>
+            <span style={{ border: '2px solid rgba(255,255,255,0.1)', borderLeftColor: '#3b82f6', borderRadius: '50%', width: '14px', height: '14px', animation: 'spin 1s linear infinite', display: 'inline-block' }}></span>
+            {parsingStatus}
+          </div>
+        )}
 
         {/* Import Review Card */}
         {importPreview && (
