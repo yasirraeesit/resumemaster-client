@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, LogIn, ChevronLeft, ShieldCheck, Mail, Lock } from 'lucide-react';
 
 export default function LoginPage({ onBack, onAuthSuccess, onNavigateToRegister }) {
@@ -6,6 +6,49 @@ export default function LoginPage({ onBack, onAuthSuccess, onNavigateToRegister 
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    /* global google */
+    if (window.google) {
+      try {
+        window.google.accounts.id.initialize({
+          client_id: import.meta.env.VITE_GOOGLE_CLIENT_ID || '1023884759929-mockclientid.apps.googleusercontent.com',
+          callback: handleGoogleCredentialResponse,
+        });
+        window.google.accounts.id.renderButton(
+          document.getElementById('google-signin-btn'),
+          { theme: 'outline', size: 'large', width: '380' }
+        );
+      } catch (e) {
+        console.error('Google accounts SDK initialize error:', e);
+      }
+    }
+  }, []);
+
+  const handleGoogleCredentialResponse = async (response) => {
+    setError('');
+    setLoading(true);
+
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+    try {
+      const res = await fetch(`${API_URL}/auth/google-login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential })
+      });
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        onAuthSuccess(data.token, data.user);
+      } else {
+        setError(data.error || 'Google login failed.');
+      }
+    } catch (err) {
+      setError('Connection failure to API server.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,6 +75,7 @@ export default function LoginPage({ onBack, onAuthSuccess, onNavigateToRegister 
       setLoading(false);
     }
   };
+
 
   return (
     <div style={{
@@ -167,6 +211,14 @@ export default function LoginPage({ onBack, onAuthSuccess, onNavigateToRegister 
               {loading ? 'Authenticating Account...' : 'Sign In to Account'}
             </button>
           </form>
+
+          <div style={{ display: 'flex', alignItems: 'center', margin: '1.5rem 0', color: 'var(--text-dim)' }}>
+            <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border-glow)' }} />
+            <span style={{ padding: '0 0.75rem', fontSize: '0.8rem' }}>or sign in with</span>
+            <hr style={{ flex: 1, border: 'none', borderTop: '1px solid var(--border-glow)' }} />
+          </div>
+
+          <div id="google-signin-btn" style={{ width: '100%', display: 'flex', justifyContent: 'center' }} />
 
           <div style={{ textAlign: 'center', marginTop: '2rem', fontSize: '0.9rem', color: 'var(--text-muted)' }}>
             New to resumemaster.online?{' '}
