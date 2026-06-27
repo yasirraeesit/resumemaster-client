@@ -16,13 +16,32 @@ This is the React + Vite frontend application for **ResumeMaster**, the next-gen
 
 ---
 
-## 🚀 Key Modules & Components
+## 🚀 Key Modules & Detailed Features
 
-* **`src/components/ResumeBuilder.jsx`**: A powerful resume customizer that maps workspace entries to live PDF previews. Includes customizable style templates (`Elegant Serif`, `Modern Minimalist`, `Technical Indigo`, `Executive Two-Column`, `Creative Gradient`, `Clean Emerald`).
-* **`src/components/ResumeTemplateSlider.jsx`**: Dynamic slideshow carousel rendering professional layouts on the landing page hero panel.
-* **`src/components/JobMatcher.jsx`**: Tinder-inspired card swiper interface calculating ATS keyword match thresholds.
-* **`src/components/JobTracker.jsx`**: Interactive drag-and-drop styled Kanban board columns tracking active applications (`Wishlist`, `Applied`, `Interview`, `Offer`, `Rejected`).
-* **`src/components/CareerSuite.jsx`**: Career copilot panel managing AI Cover Letter drafts, LinkedIn profile optimizations, and interview simulation questions.
+* **⚡ Interactive Resume Builder (`src/components/ResumeBuilder.jsx`)**:
+  * Real-time sidebar entry system mapping text input directly onto styled layouts.
+  * Instant document sheet rendering with responsive margins and fonts.
+  * 6 selectable templates:
+    * `Elegant Serif`: For senior or academic roles requiring classical typography.
+    * `Modern Minimalist`: A clean, high-space developer and designer aesthetic.
+    * `Technical Indigo`: Accented layout designed for technical engineers and analysts.
+    * `Executive Two-Column`: Densely organized two-column grid.
+    * `Creative Gradient`: Splash of colors tailored for creators and portfolios.
+    * `Clean Emerald`: Balanced nature theme with sharp alignment.
+* **🎭 Landing Page Slideshow (`src/components/ResumeTemplateSlider.jsx`)**:
+  * Automatic transitions displaying 6 mock full-length resumes.
+  * Integrated zoom sliders and interactive toolbar layouts.
+* **🔥 Swipe-to-Match Job cards (`src/components/JobMatcher.jsx`)**:
+  * Swipe right/left animations mapping to job databases.
+  * ATS match percentage indicator highlighting matched/missing keywords on the fly.
+* **📋 Kanban Job Tracker Board (`src/components/JobTracker.jsx`)**:
+  * Pipelines dividing job roles into: `Wishlist`, `Applied`, `Interview`, `Offer`, and `Rejected`.
+  * Click actions to update cards, transition states, and confetti-powered celebration states.
+* **🤖 Career copilot tools (`src/components/CareerSuite.jsx`)**:
+  * Generate custom cover letters, LinkedIn optimizations, and test technical questions.
+* **🎨 Styling Architecture (`src/index.css`)**:
+  * Comprehensive light/dark theme color variable schemes.
+  * Responsive queries adapting to screen viewports.
 
 ---
 
