@@ -159,6 +159,8 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
   const [atsJd, setAtsJd]               = useState('');
   const [atsLoading, setAtsLoading]     = useState(false);
   const [atsResult, setAtsResult]       = useState(null);
+  const [tailorLoading, setTailorLoading] = useState(false);
+  const [tailoredResumeData, setTailoredResumeData] = useState(null);
 
   // ── Passive Bullet Point Weak-Word Scanner ─────────────────────────
   const WEAK_PATTERNS = [
@@ -752,6 +754,25 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
     }
   };
 
+  const handleTailorResume = async () => {
+    setTailorLoading(true);
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+    try {
+      const res = await fetch(`${API_URL}/ai/tailor-resume`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ resumeData, jobDescription: atsJd }),
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error);
+      setTailoredResumeData(data);
+    } catch (err) {
+      alert('Failed to tailor resume: ' + err.message);
+    } finally {
+      setTailorLoading(false);
+    }
+  };
+
   const getScoreColor = (score) => {
     if (score >= 75) return '#10b981';
     if (score >= 50) return '#f59e0b';
@@ -897,6 +918,127 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {tailoredResumeData && (
+          <div style={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(5, 5, 10, 0.85)',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 10000,
+            animation: 'fadeIn 0.25s ease'
+          }}>
+            <div className="glass-card" style={{
+              padding: '2rem',
+              borderRadius: '1.25rem',
+              width: '650px',
+              maxWidth: '95%',
+              maxHeight: '85vh',
+              overflowY: 'auto',
+              border: '1px solid rgba(16,185,129,0.2)',
+              background: 'linear-gradient(135deg, rgba(20,25,35,0.9), rgba(10,15,25,0.98))',
+              boxShadow: '0 24px 50px rgba(0,0,0,0.6), 0 0 30px rgba(16,185,129,0.1)'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.75rem' }}>
+                <h3 style={{ fontSize: '1.1rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 800 }}>
+                  <Sparkles size={18} /> Review Tailored Resume
+                </h3>
+                <button onClick={() => setTailoredResumeData(null)} style={{ background: 'transparent', border: 'none', color: 'var(--text-dim)', cursor: 'pointer' }}>
+                  <X size={18} />
+                </button>
+              </div>
+
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+                Gemini has optimized your professional summary, experience bullets, and project descriptions to align with the core expectations of the target job description. Review the changes below:
+              </p>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                {/* Summary Comparison */}
+                {tailoredResumeData.summary && (
+                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.04)' }}>
+                    <h4 style={{ fontSize: '0.85rem', color: 'var(--text-main)', marginBottom: '0.6rem', fontWeight: 700 }}>Professional Summary</h4>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.78rem' }}>
+                      <div>
+                        <div style={{ color: '#ef4444', fontWeight: 600, marginBottom: '0.25rem' }}>Original</div>
+                        <p style={{ color: 'var(--text-dim)', lineHeight: 1.4 }}>{resumeData.summary || '(None)'}</p>
+                      </div>
+                      <div style={{ borderLeft: '1px solid rgba(255,255,255,0.05)', paddingLeft: '1rem' }}>
+                        <div style={{ color: '#10b981', fontWeight: 600, marginBottom: '0.25rem' }}>Tailored</div>
+                        <p style={{ color: 'var(--text-main)', lineHeight: 1.4 }}>{tailoredResumeData.summary}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Experience bullets comparison */}
+                {tailoredResumeData.experience && tailoredResumeData.experience.length > 0 && (
+                  <div>
+                    <h4 style={{ fontSize: '0.85rem', color: 'var(--text-main)', marginBottom: '0.6rem', fontWeight: 700 }}>Work Experience Bullet Points</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {tailoredResumeData.experience.map((exp, idx) => {
+                        const origExp = resumeData.experience?.[idx] || {};
+                        return (
+                          <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', padding: '1rem', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.04)' }}>
+                            <div style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
+                              {exp.role} at {exp.company}
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', fontSize: '0.75rem' }}>
+                              <div>
+                                <div style={{ color: '#ef4444', fontWeight: 600, marginBottom: '0.25rem' }}>Original</div>
+                                <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', color: 'var(--text-dim)', lineHeight: 1.4, margin: 0 }}>
+                                  {origExp.description || '(None)'}
+                                </pre>
+                              </div>
+                              <div style={{ borderLeft: '1px solid rgba(255,255,255,0.05)', paddingLeft: '1rem' }}>
+                                <div style={{ color: '#10b981', fontWeight: 600, marginBottom: '0.25rem' }}>Tailored</div>
+                                <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'inherit', color: 'var(--text-main)', lineHeight: 1.4, margin: 0 }}>
+                                  {exp.description}
+                                </pre>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Action Buttons */}
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: '1.25rem' }}>
+                <button
+                  className="btn-secondary"
+                  onClick={() => setTailoredResumeData(null)}
+                  style={{ padding: '0.5rem 1rem', fontSize: '0.82rem' }}
+                >
+                  Discard Changes
+                </button>
+                <button
+                  className="btn-primary"
+                  onClick={() => {
+                    setResumeData(tailoredResumeData);
+                    setTailoredResumeData(null);
+                    setSaveStatus('Resume tailored successfully!');
+                    setTimeout(() => setSaveStatus(''), 5000);
+                  }}
+                  style={{
+                    padding: '0.5rem 1.25rem',
+                    fontSize: '0.82rem',
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    border: 'none',
+                    fontWeight: 'bold',
+                    boxShadow: '0 4px 12px rgba(16,185,129,0.2)'
+                  }}
+                >
+                  Accept & Apply Tailoring
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
@@ -1595,6 +1737,32 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                     ))}
                   </div>
                 </div>
+
+                {/* One-Click AI Tailoring Button */}
+                <button
+                  className="btn-primary"
+                  onClick={handleTailorResume}
+                  disabled={tailorLoading}
+                  style={{
+                    width: '100%',
+                    marginTop: '1.25rem',
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    boxShadow: '0 4px 15px rgba(16,185,129,0.3)',
+                    fontWeight: 'bold',
+                    fontSize: '0.82rem',
+                    padding: '0.6rem',
+                    gap: '0.5rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: 'none',
+                    borderRadius: '0.375rem',
+                    color: '#fff',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <Sparkles size={14} /> {tailorLoading ? 'Tailoring Resume with AI...' : 'Tailor Resume with Gemini'}
+                </button>
               </div>
             )}
           </div>
