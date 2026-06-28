@@ -594,6 +594,134 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
     }
   };
 
+  const handleDownloadWord = () => {
+    const name = resumeData.personalInfo?.fullName?.trim().replace(/\s+/g, '-') || 'Resume';
+    const filename = `${name}-ResumeMaster.doc`;
+
+    let html = '';
+    html += '<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">';
+    html += '<head>';
+    html += '<title>' + (resumeData.personalInfo?.fullName || 'Resume') + '</title>';
+    html += '<!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->';
+    html += '<style>';
+    html += 'body { font-family: "Arial", sans-serif; font-size: 11pt; color: #333333; line-height: 1.4; }';
+    html += 'h1 { font-size: 20pt; font-weight: bold; text-align: center; margin-bottom: 3pt; color: #0f172a; }';
+    html += '.title { text-align: center; font-size: 12pt; font-style: italic; color: #475569; margin-bottom: 6pt; }';
+    html += '.contact-info { text-align: center; font-size: 10pt; color: #475569; margin-bottom: 15pt; }';
+    html += '.section-title { font-size: 12pt; font-weight: bold; text-transform: uppercase; border-bottom: 2px solid #334155; margin-top: 18pt; margin-bottom: 8pt; padding-bottom: 2pt; color: #0f172a; }';
+    html += '.item-header { font-weight: bold; font-size: 11pt; margin-bottom: 2pt; }';
+    html += '.item-sub { font-style: italic; font-size: 10pt; color: #475569; margin-bottom: 4pt; }';
+    html += 'ul { margin-top: 2pt; margin-bottom: 6pt; padding-left: 20pt; }';
+    html += 'li { margin-bottom: 2pt; }';
+    html += '.project-link { font-size: 9.5pt; color: #2563eb; text-decoration: none; margin-top: 2pt; }';
+    html += '</style>';
+    html += '</head>';
+    html += '<body>';
+    
+    html += '<h1>' + (resumeData.personalInfo?.fullName || 'Your Name') + '</h1>';
+    if (resumeData.personalInfo?.title) {
+      html += '<div class="title">' + resumeData.personalInfo.title + '</div>';
+    }
+    
+    const contactParts = [
+      resumeData.personalInfo?.email,
+      resumeData.personalInfo?.phone,
+      resumeData.personalInfo?.location,
+      resumeData.personalInfo?.linkedin
+    ].filter(Boolean);
+    html += '<div class="contact-info">' + contactParts.join(' | ') + '</div>';
+
+    sections.forEach(secKey => {
+      if (secKey === 'summary' && resumeData.summary) {
+        html += '<div class="section-title">Summary</div>';
+        html += '<p>' + resumeData.summary + '</p>';
+      }
+      else if (secKey === 'skills' && resumeData.skills && resumeData.skills.length > 0) {
+        html += '<div class="section-title">Skills & Technologies</div>';
+        html += '<p><strong>' + resumeData.skills.join(', ') + '</strong></p>';
+      }
+      else if (secKey === 'experience' && resumeData.experience && resumeData.experience.length > 0) {
+        html += '<div class="section-title">Work Experience</div>';
+        resumeData.experience.forEach(exp => {
+          html += '<div style="margin-bottom: 10pt;">';
+          html += '<div class="item-header" style="display: table; width: 100%;">';
+          html += '<span style="display: table-cell; text-align: left;">' + exp.role + ' — ' + exp.company + '</span>';
+          html += '<span style="display: table-cell; text-align: right; font-weight: normal; font-size: 10pt;">' + exp.startDate + ' - ' + exp.endDate + '</span>';
+          html += '</div>';
+          if (exp.description) {
+            html += '<ul>';
+            exp.description.split('\n').forEach(b => {
+              const bullet = b.replace(/^[•\-\*\s]+/, '').trim();
+              if (bullet) {
+                html += '<li>' + bullet + '</li>';
+              }
+            });
+            html += '</ul>';
+          }
+          html += '</div>';
+        });
+      }
+      else if (secKey === 'education' && resumeData.education && resumeData.education.length > 0) {
+        html += '<div class="section-title">Education</div>';
+        resumeData.education.forEach(edu => {
+          html += '<div style="margin-bottom: 8pt;">';
+          html += '<div class="item-header" style="display: table; width: 100%;">';
+          html += '<span style="display: table-cell; text-align: left;">' + edu.school + '</span>';
+          html += '<span style="display: table-cell; text-align: right; font-weight: normal; font-size: 10pt;">' + edu.startDate + ' - ' + edu.endDate + '</span>';
+          html += '</div>';
+          html += '<div class="item-sub">' + edu.degree + '</div>';
+          html += '</div>';
+        });
+      }
+      else if (secKey === 'projects' && resumeData.projects && resumeData.projects.length > 0) {
+        html += '<div class="section-title">Personal Projects</div>';
+        resumeData.projects.forEach(proj => {
+          html += '<div style="margin-bottom: 10pt;">';
+          html += '<div class="item-header">' + proj.name + '</div>';
+          if (proj.description) {
+            html += '<ul>';
+            proj.description.split('\n').forEach(b => {
+              const bullet = b.replace(/^[•\-\*\s]+/, '').trim();
+              if (bullet) {
+                html += '<li>' + bullet + '</li>';
+              }
+            });
+            html += '</ul>';
+          }
+          if (proj.url) {
+            const cleanUrl = proj.url.startsWith('http') ? proj.url : 'https://' + proj.url;
+            html += '<div class="project-link">🔗 <a href="' + cleanUrl + '">' + proj.url + '</a></div>';
+          }
+          html += '</div>';
+        });
+      }
+      else {
+        const customSec = resumeData.customSections?.[secKey];
+        if (customSec && customSec.items && customSec.items.length > 0) {
+          html += '<div class="section-title">' + customSec.title + '</div>';
+          html += '<ul>';
+          customSec.items.forEach(item => {
+            html += '<li>' + item + '</li>';
+          });
+          html += '</ul>';
+        }
+      }
+    });
+
+    html += '</body>';
+    html += '</html>';
+
+    const blob = new Blob(['\ufeff' + html], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   const getFullResumeText = () => [
     resumeData.personalInfo?.fullName,
     resumeData.personalInfo?.title,
@@ -695,8 +823,12 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
               <Save size={14} /> Save
             </button>
 
+            <button className="btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.78rem', gap: '0.35rem' }} onClick={handleDownloadWord}>
+              <FileText size={14} /> Word
+            </button>
+
             <button className="btn-primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', gap: '0.35rem', opacity: pdfExporting ? 0.7 : 1 }} onClick={handleDownloadPDF} disabled={pdfExporting}>
-              <Download size={14} /> {pdfExporting ? 'Export' : 'Export'}
+              <Download size={14} /> {pdfExporting ? 'PDF Exporting...' : 'PDF'}
             </button>
           </div>
         </div>
@@ -1513,7 +1645,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                 <div key="experience">
                   <div className="section-title">Work Experience</div>
                   {resumeData.experience.map((exp, idx) => (
-                    <div key={idx} style={{ marginBottom: '1rem' }}>
+                    <div key={idx} className="resume-section-item" style={{ marginBottom: '1rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '13.5px' }}>
                         <span>{exp.role} — {exp.company}</span>
                         <span>{exp.startDate} - {exp.endDate}</span>
@@ -1542,7 +1674,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                 <div key="education">
                   <div className="section-title">Education</div>
                   {resumeData.education.map((edu, idx) => (
-                    <div key={idx} style={{ marginBottom: '0.75rem' }}>
+                    <div key={idx} className="resume-section-item" style={{ marginBottom: '0.75rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '13.5px' }}>
                         <span>{edu.school}</span>
                         <span>{edu.startDate} - {edu.endDate}</span>
@@ -1558,7 +1690,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                 <div key="projects">
                   <div className="section-title">Personal Projects</div>
                   {resumeData.projects.map((proj, idx) => (
-                    <div key={idx} style={{ marginBottom: '1rem' }}>
+                    <div key={idx} className="resume-section-item" style={{ marginBottom: '1rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '13.5px' }}>
                         <span>{proj.name}</span>
                       </div>

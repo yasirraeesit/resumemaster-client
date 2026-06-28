@@ -1398,6 +1398,12 @@ p {
   100% { transform: rotate(360deg); }
 }
 
+/* Print page break prevention */
+.resume-section-item {
+  page-break-inside: avoid !important;
+  break-inside: avoid !important;
+}
+
 
 
 
