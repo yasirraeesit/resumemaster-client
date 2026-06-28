@@ -7,6 +7,10 @@ export default function CareerSuite({ resumeData, token }) {
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  // Cover Letter parameters
+  const [tone, setTone] = useState('Professional');
+  const [length, setLength] = useState('Detailed');
+
   // Generated materials
   const [coverLetter, setCoverLetter] = useState('');
   const [linkedin, setLinkedin] = useState(null);
@@ -59,6 +63,28 @@ export default function CareerSuite({ resumeData, token }) {
     `;
   };
 
+  const getKeywordsCheck = () => {
+    if (!targetJd) return [];
+    const candidateSkills = resumeData.skills || [];
+    const jdLower = targetJd.toLowerCase();
+    
+    const relevantSkills = candidateSkills.filter(skill => {
+      if (!skill) return false;
+      const cleanSkill = skill.toLowerCase().trim();
+      if (cleanSkill.length < 2) return false;
+      const regex = new RegExp('\\b' + cleanSkill.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\b', 'i');
+      return regex.test(jdLower);
+    });
+
+    const clLower = (coverLetter || '').toLowerCase();
+    return relevantSkills.map(skill => {
+      const cleanSkill = skill.toLowerCase().trim();
+      const regex = new RegExp('\\b' + cleanSkill.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&') + '\\b', 'i');
+      const isMatched = regex.test(clLower);
+      return { skill, isMatched };
+    });
+  };
+
   const handleGenerate = async () => {
     if (activeTool !== 'linkedin' && activeTool !== 'saved' && (!targetJd || targetJd.trim() === '')) {
       alert('Please paste a target Job Description first.');
@@ -69,7 +95,9 @@ export default function CareerSuite({ resumeData, token }) {
 
     const body = {
       resumeText: getFullResumeText(),
-      jobDescription: targetJd
+      jobDescription: targetJd,
+      tone,
+      length
     };
 
     try {
@@ -300,6 +328,37 @@ export default function CareerSuite({ resumeData, token }) {
           </div>
         )}
 
+        {activeTool === 'cover' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.25rem' }}>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label" style={{ fontSize: '0.75rem' }}>Tone</label>
+              <select 
+                className="form-input" 
+                value={tone} 
+                onChange={(e) => setTone(e.target.value)}
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text-main)', fontSize: '0.8rem', padding: '0.4rem 0.5rem' }}
+              >
+                <option value="Professional">Professional</option>
+                <option value="Confident">Confident</option>
+                <option value="Enthusiastic">Enthusiastic</option>
+                <option value="Creative">Creative</option>
+              </select>
+            </div>
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label" style={{ fontSize: '0.75rem' }}>Length</label>
+              <select 
+                className="form-input" 
+                value={length} 
+                onChange={(e) => setLength(e.target.value)}
+                style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text-main)', fontSize: '0.8rem', padding: '0.4rem 0.5rem' }}
+              >
+                <option value="Detailed">Detailed (~400 words)</option>
+                <option value="Short">Short (~250 words)</option>
+              </select>
+            </div>
+          </div>
+        )}
+
         {activeTool !== 'saved' && (
           <button className="btn-primary" onClick={handleGenerate} disabled={loading}>
             {loading ? 'Analyzing & Tailoring...' : 'Generate AI Materials'}
@@ -352,9 +411,66 @@ export default function CareerSuite({ resumeData, token }) {
                         <Copy size={12} /> Copy
                       </button>
                     </div>
-                    <pre style={{ clear: 'both', whiteSpace: 'pre-wrap', fontFamily: 'var(--font-sans)', fontSize: '0.85rem', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.2)', padding: '1.25rem', borderRadius: '0.75rem', border: '1px solid rgba(255,255,255,0.05)', marginTop: '0.5rem', lineHeight: '1.6' }}>
-                      {coverLetter}
-                    </pre>
+                    
+                    <div style={{ display: 'grid', gridTemplateColumns: '7fr 3fr', gap: '1.25rem', marginTop: '0.5rem' }}>
+                      {/* Left: Cover Letter Editor */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <textarea
+                          className="form-textarea"
+                          rows={24}
+                          value={coverLetter}
+                          onChange={(e) => setCoverLetter(e.target.value)}
+                          style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: '0.88rem',
+                            color: 'var(--text-muted)',
+                            background: 'rgba(0,0,0,0.2)',
+                            padding: '1.25rem',
+                            borderRadius: '0.75rem',
+                            border: '1px solid rgba(255,255,255,0.05)',
+                            lineHeight: '1.6',
+                            resize: 'vertical'
+                          }}
+                        />
+                      </div>
+
+                      {/* Right: Live ATS Keywords Match Panel */}
+                      <div className="glass-card" style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', padding: '1rem', borderRadius: '0.75rem', height: 'fit-content' }}>
+                        <h4 style={{ fontSize: '0.85rem', color: '#10b981', display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.75rem', fontWeight: 'bold' }}>
+                          <Sparkles size={14} /> ATS Keywords Check
+                        </h4>
+                        <p style={{ fontSize: '0.72rem', color: 'var(--text-dim)', marginBottom: '1rem', lineHeight: 1.4 }}>
+                          These skills from your profile match the target JD. Make sure they are mentioned in the cover letter text:
+                        </p>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                          {getKeywordsCheck().length === 0 ? (
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-dim)', fontStyle: 'italic' }}>
+                              No matching keywords found between your skills and the JD.
+                            </div>
+                          ) : (
+                            getKeywordsCheck().map(({ skill, isMatched }) => (
+                              <div key={skill} style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.4rem',
+                                fontSize: '0.75rem',
+                                color: isMatched ? 'var(--text-main)' : 'var(--text-dim)',
+                                background: isMatched ? 'rgba(16,185,129,0.05)' : 'rgba(255,255,255,0.01)',
+                                padding: '0.35rem 0.5rem',
+                                borderRadius: '0.35rem',
+                                border: isMatched ? '1px solid rgba(16,185,129,0.15)' : '1px solid rgba(255,255,255,0.03)',
+                                transition: 'all 0.25s ease'
+                              }}>
+                                <span style={{ color: isMatched ? '#10b981' : 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                  {isMatched ? '✓' : '○'}
+                                </span>
+                                <span style={{ fontWeight: isMatched ? 600 : 'normal' }}>{skill}</span>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 ) : (
                   <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '3rem' }}>No cover letter generated yet. Click generate above.</div>
