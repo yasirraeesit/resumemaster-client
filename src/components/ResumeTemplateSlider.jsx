@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Sparkles, Award, FileText, CheckCircle2, ShieldCheck, Mail, Phone, MapPin, Globe, Briefcase, GraduationCap, ZoomIn, ZoomOut, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Award, FileText, ShieldCheck, Mail, Phone, MapPin, Globe, Briefcase, GraduationCap, ZoomIn, ZoomOut, Download } from 'lucide-react';
 
 const TEMPLATES = [
   {

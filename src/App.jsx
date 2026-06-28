@@ -467,8 +467,9 @@ export default function App() {
             )}
             {activeTab === 'tracker' && (
               <JobTracker
-                columns={trackerColumns}
-                setColumns={setTrackerColumns}
+                token={token}
+                onNavigate={setActiveTab}
+                setResumeData={setResumeData}
               />
             )}
             {activeTab === 'copilot' && (
@@ -483,6 +484,7 @@ export default function App() {
                 resumeData={resumeData}
                 onNavigate={setActiveTab}
                 onGoSettings={goToSettings}
+                onUpdateUser={updateUser}
               />
             )}
             {activeTab === 'settings' && (

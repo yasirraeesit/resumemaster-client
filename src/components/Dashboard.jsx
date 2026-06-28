@@ -34,18 +34,27 @@ export default function Dashboard({ user, token, onNavigate, resumeData }) {
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!token) { setLoading(false); return; }
+      if (!token) {
+        const jobsRaw = localStorage.getItem('resumemaster_job_tracker_guest');
+        const jobs = jobsRaw ? JSON.parse(jobsRaw) : [];
+        setStats({
+          resumes: 0,
+          documents: 0,
+          jobs: Array.isArray(jobs) ? jobs.length : 0,
+        });
+        setLoading(false);
+        return;
+      }
       try {
-        const [resumeRes, docRes] = await Promise.all([
+        const [resumeRes, docRes, jobRes] = await Promise.all([
           fetch(`${API_URL}/resumes`,   { headers: { Authorization: `Bearer ${token}` } }),
           fetch(`${API_URL}/documents`, { headers: { Authorization: `Bearer ${token}` } }),
+          fetch(`${API_URL}/job-applications`, { headers: { Authorization: `Bearer ${token}` } }),
         ]);
 
         const resumes   = resumeRes.ok   ? await resumeRes.json()   : [];
         const documents = docRes.ok      ? await docRes.json()      : [];
-
-        const jobsRaw = localStorage.getItem('jobTrackerItems');
-        const jobs = jobsRaw ? JSON.parse(jobsRaw) : [];
+        const jobs      = jobRes.ok      ? await jobRes.json()      : [];
 
         setStats({
           resumes:   Array.isArray(resumes)   ? resumes.length   : 0,
@@ -238,7 +247,7 @@ export default function Dashboard({ user, token, onNavigate, resumeData }) {
             </div>
           ) : (
             recentActivity.map((item, idx) => {
-              const { Icon } = item;
+              const Icon = item.icon;
               return (
                 <div key={idx} style={{
                   display: 'flex', gap: '0.75rem', alignItems: 'flex-start',

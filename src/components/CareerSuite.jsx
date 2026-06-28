@@ -11,6 +11,14 @@ export default function CareerSuite({ resumeData, token }) {
   const [tone, setTone] = useState('Professional');
   const [length, setLength] = useState('Detailed');
 
+  // Chatbot Interview simulator states
+  const [interviewActive, setInterviewActive] = useState(false);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [currentAnswer, setCurrentAnswer] = useState('');
+  const [isTTSActive, setIsTTSActive] = useState(true);
+  const [showScorecard, setShowScorecard] = useState(false);
+
   // Generated materials
   const [coverLetter, setCoverLetter] = useState('');
   const [linkedin, setLinkedin] = useState(null);
@@ -240,6 +248,129 @@ export default function CareerSuite({ resumeData, token }) {
     };
 
     recognition.start();
+  };
+
+  // Speech-to-text for Chat Answer
+  const handleRecordChatAnswer = () => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+      alert('Speech recognition is not supported in this browser. Try Google Chrome or Safari.');
+      return;
+    }
+
+    if (isRecording) {
+      setIsRecording(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = 'en-US';
+    recognition.interimResults = false;
+
+    recognition.onstart = () => {
+      setIsRecording(true);
+    };
+
+    recognition.onresult = (event) => {
+      const resultText = event.results[0][0].transcript;
+      setCurrentAnswer(prev => (prev ? prev + ' ' + resultText : resultText));
+    };
+
+    recognition.onerror = () => {
+      setIsRecording(false);
+    };
+
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+
+    recognition.start();
+  };
+
+  const speakText = (text) => {
+    if (!isTTSActive) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 0.95;
+    window.speechSynthesis.speak(utterance);
+  };
+
+  const startInterview = () => {
+    if (!interviewPrep || interviewPrep.length === 0) return;
+    setInterviewActive(true);
+    setCurrentQuestionIndex(0);
+    setShowScorecard(false);
+    setTranscripts({});
+    setEvaluations({});
+    
+    const firstQ = interviewPrep[0];
+    const initialMsgs = [
+      { sender: 'interviewer', text: "Hello! Welcome to your personalized mock interview. I will guide you through 4 custom questions tailored to your background and the target role." },
+      { sender: 'interviewer', text: `First, let's look at a ${firstQ.type} question: ${firstQ.question}` }
+    ];
+    setChatMessages(initialMsgs);
+    
+    setTimeout(() => {
+      speakText(`First, let's look at a ${firstQ.type} question. ${firstQ.question}`);
+    }, 1000);
+  };
+
+  const submitChatAnswer = async () => {
+    if (!currentAnswer.trim()) return;
+    
+    const answeredIndex = currentQuestionIndex;
+    const answeredQ = interviewPrep[answeredIndex];
+    const userAnswerText = currentAnswer;
+    
+    const updatedMessages = [...chatMessages, { sender: 'candidate', text: userAnswerText }];
+    setChatMessages(updatedMessages);
+    setCurrentAnswer('');
+
+    setEvalLoading(prev => ({ ...prev, [answeredQ.id]: true }));
+    
+    const evalPromise = fetch(`${API_URL}/career/interview-evaluate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: answeredQ.question,
+        userAnswer: userAnswerText,
+        resumeText: getFullResumeText()
+      })
+    })
+    .then(res => res.json())
+    .then(result => {
+      setEvaluations(prev => ({ ...prev, [answeredQ.id]: result }));
+      setEvalLoading(prev => ({ ...prev, [answeredQ.id]: false }));
+      return result;
+    })
+    .catch(err => {
+      setEvalLoading(prev => ({ ...prev, [answeredQ.id]: false }));
+      console.error('Failed to evaluate answer:', err);
+    });
+
+    const nextIndex = answeredIndex + 1;
+    if (nextIndex < interviewPrep.length) {
+      const nextQ = interviewPrep[nextIndex];
+      setCurrentQuestionIndex(nextIndex);
+      
+      setChatMessages(prev => [...prev, { sender: 'interviewer', text: `Got it. Let's move on to the next question. This is a ${nextQ.type} question: ${nextQ.question}` }]);
+      speakText(`Let's move on to the next question. This is a ${nextQ.type} question. ${nextQ.question}`);
+    } else {
+      setChatMessages(prev => [...prev, { sender: 'interviewer', text: "Excellent! You have answered all the questions. I am calculating your overall score and compiling your feedback scorecard now..." }]);
+      speakText("Excellent! You have answered all the questions. I am calculating your overall score and compiling your feedback scorecard now.");
+      
+      try {
+        await evalPromise;
+        setTimeout(() => {
+          setShowScorecard(true);
+          setInterviewActive(false);
+        }, 1500);
+      } catch (err) {
+        setShowScorecard(true);
+        setInterviewActive(false);
+      }
+    }
   };
 
   // Evaluate transcribed answer with Gemini
@@ -530,93 +661,317 @@ export default function CareerSuite({ resumeData, token }) {
             {/* Interview Prep & Speech Evaluation */}
             {activeTool === 'interview' && (
               <div>
-                {interviewPrep && interviewPrep.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                    {interviewPrep.map((q, idx) => (
-                      <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', padding: '1.25rem', borderRadius: '0.75rem' }}>
-                        <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                          <span style={{ fontSize: '0.75rem', background: q.type === 'Technical' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(236, 72, 153, 0.15)', color: q.type === 'Technical' ? 'var(--color-accent)' : 'var(--color-secondary)', padding: '0.15rem 0.4rem', borderRadius: '4px', fontWeight: 'bold' }}>
-                            {q.type}
-                          </span>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Q#{q.id}</span>
-                        </div>
-                        <h4 style={{ fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: '0.75rem', lineHeight: '1.4' }}>{q.question}</h4>
-                        
-                        {/* Audio Speech Recording Interface */}
-                        <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem', border: '1px solid rgba(255,255,255,0.04)' }}>
-                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                            <span style={{ fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Spoken Response Simulator</span>
-                            <button
-                              className="btn-secondary"
-                              onClick={() => handleRecordSpeech(q.id)}
-                              style={{
-                                padding: '0.25rem 0.5rem',
-                                fontSize: '0.75rem',
-                                background: recordingQuestionId === q.id ? 'var(--color-danger)' : 'transparent',
-                                borderColor: recordingQuestionId === q.id ? 'transparent' : 'rgba(255,255,255,0.15)',
-                                color: 'var(--text-main)',
-                                gap: '0.25rem'
-                              }}
-                            >
-                              {recordingQuestionId === q.id ? <MicOff size={12} /> : <Mic size={12} />}
-                              {recordingQuestionId === q.id ? 'Stop Dictating' : 'Speak Answer'}
-                            </button>
-                          </div>
-                          
-                          <textarea
-                            className="form-textarea"
-                            rows={3}
-                            placeholder="Click 'Speak Answer' to record, or type your practice response here..."
-                            value={transcripts[q.id] || ''}
-                            onChange={(e) => setTranscripts(prev => ({ ...prev, [q.id]: e.target.value }))}
-                            style={{ fontSize: '0.8rem', background: 'rgba(0,0,0,0.1)', border: '1px solid rgba(255,255,255,0.08)' }}
-                          />
+                {!interviewActive && !showScorecard && interviewPrep && interviewPrep.length > 0 && (
+                  <button
+                    className="btn-primary"
+                    onClick={startInterview}
+                    style={{
+                      width: '100%',
+                      marginBottom: '1.5rem',
+                      background: 'linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))',
+                      boxShadow: '0 4px 15px rgba(139,92,246,0.3)',
+                      fontWeight: 'bold',
+                      padding: '0.6rem',
+                      gap: '0.5rem',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      border: 'none',
+                      borderRadius: '0.375rem',
+                      color: '#fff',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <Sparkles size={16} /> Start Conversational Mock Interview
+                  </button>
+                )}
 
-                          {transcripts[q.id] && (
-                            <button
-                              className="btn-primary"
-                              onClick={() => handleEvaluateAnswer(q.id, q.question)}
-                              disabled={evalLoading[q.id]}
-                              style={{ width: '100%', marginTop: '0.5rem', fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}
-                            >
-                              {evalLoading[q.id] ? 'Coaching Model Analyzing Spoken Answer...' : 'Evaluate Answer with AI Coach'}
-                            </button>
-                          )}
-                        </div>
+                {/* Conversational Chat Interface */}
+                {interviewActive && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', background: 'rgba(0,0,0,0.2)', padding: '1.25rem', borderRadius: '1rem', border: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.06)', paddingBottom: '0.75rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 8px #10b981' }}></div>
+                        <span style={{ fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--text-main)' }}>Live Mock Interview Session</span>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <button
+                          onClick={() => setIsTTSActive(v => !v)}
+                          style={{
+                            background: 'transparent',
+                            border: '1px solid rgba(255,255,255,0.1)',
+                            borderRadius: '0.35rem',
+                            color: isTTSActive ? '#10b981' : 'var(--text-dim)',
+                            padding: '0.2rem 0.5rem',
+                            fontSize: '0.7rem',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.25rem'
+                          }}
+                        >
+                          🔊 TTS: {isTTSActive ? 'ON' : 'OFF'}
+                        </button>
+                        <button
+                          onClick={() => { setInterviewActive(false); setShowScorecard(false); }}
+                          style={{ background: 'transparent', border: 'none', color: 'var(--color-danger)', cursor: 'pointer', fontSize: '0.75rem' }}
+                        >
+                          End Interview
+                        </button>
+                      </div>
+                    </div>
 
-                        {/* Speech Evaluation Diagnostics */}
-                        {evaluations[q.id] && (
-                          <div style={{ background: 'rgba(13, 10, 26, 0.5)', padding: '1rem', borderRadius: '0.5rem', border: '1.5px solid var(--color-primary)', marginTop: '0.75rem' }}>
-                            <div style={{ display: 'flex', justifycontent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
-                              <h5 style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 'bold' }}>AI Evaluation Score</h5>
-                              <span style={{ fontSize: '0.85rem', background: 'var(--color-primary)', color: 'var(--text-main)', padding: '0.15rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>
-                                {evaluations[q.id].score}/100
-                              </span>
-                            </div>
-                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                              <div><strong>Strengths:</strong> {evaluations[q.id].strengths}</div>
-                              <div><strong>Weaknesses:</strong> {evaluations[q.id].weaknesses}</div>
-                              <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.5rem', borderRadius: '4px', marginTop: '0.25rem' }}>
-                                <strong>Recommended Model Answer (STAR):</strong>
-                                <p style={{ marginTop: '0.25rem', italic: 'true', fontSize: '0.75rem', color: 'var(--text-main)' }}>
-                                  {evaluations[q.id].modelAnswer}
-                                </p>
+                    {/* Chat Messages Feed */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', maxHeight: '350px', overflowY: 'auto', padding: '0.5rem 0' }}>
+                      {chatMessages.map((msg, i) => {
+                        const isInterviewer = msg.sender === 'interviewer';
+                        return (
+                          <div key={i} style={{
+                            display: 'flex',
+                            justifyContent: isInterviewer ? 'flex-start' : 'flex-end',
+                            width: '100%'
+                          }}>
+                            <div style={{
+                              maxWidth: '80%',
+                              padding: '0.75rem 1rem',
+                              borderRadius: '0.75rem',
+                              fontSize: '0.82rem',
+                              lineHeight: 1.4,
+                              background: isInterviewer ? 'rgba(255,255,255,0.03)' : 'var(--color-primary)',
+                              border: isInterviewer ? '1px solid rgba(255,255,255,0.05)' : 'none',
+                              color: isInterviewer ? 'var(--text-muted)' : '#fff',
+                              borderRadiusStyle: isInterviewer ? '0px 12px 12px 12px' : '12px 0px 12px 12px'
+                            }}>
+                              <div style={{ fontSize: '0.68rem', fontWeight: 'bold', color: isInterviewer ? 'var(--color-primary-hover)' : 'rgba(255,255,255,0.7)', marginBottom: '0.25rem' }}>
+                                {isInterviewer ? 'AI Interviewer' : 'You (Candidate)'}
                               </div>
+                              {msg.text}
                             </div>
                           </div>
-                        )}
+                        );
+                      })}
+                    </div>
 
-                        <div style={{ background: 'rgba(0,0,0,0.15)', padding: '0.75rem', borderRadius: '0.5rem', marginTop: '0.5rem' }}>
-                          <h5 style={{ fontSize: '0.8rem', color: 'var(--color-primary-hover)', marginBottom: '0.25rem' }}>Coaching Answer Tips:</h5>
-                          <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'var(--font-sans)', fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
-                            {q.tips}
-                          </pre>
+                    {/* Chat Input controls */}
+                    <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', background: 'rgba(0,0,0,0.15)', padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.04)' }}>
+                      <textarea
+                        className="form-textarea"
+                        rows={2}
+                        placeholder="Type your response here or speak it aloud..."
+                        value={currentAnswer}
+                        onChange={(e) => setCurrentAnswer(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitChatAnswer(); } }}
+                        style={{ flex: 1, background: 'transparent', border: 'none', fontSize: '0.8rem', padding: '0.25rem', resize: 'none', outline: 'none' }}
+                      />
+                      <button
+                        className="btn-secondary"
+                        onClick={handleRecordChatAnswer}
+                        style={{
+                          padding: '0.5rem',
+                          background: isRecording ? 'var(--color-danger)' : 'transparent',
+                          borderColor: isRecording ? 'transparent' : 'rgba(255,255,255,0.08)',
+                          color: 'var(--text-main)',
+                          borderRadius: '50%',
+                          width: '32px',
+                          height: '32px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          border: '1px solid rgba(255,255,255,0.08)',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        {isRecording ? <MicOff size={14} /> : <Mic size={14} />}
+                      </button>
+                      <button
+                        className="btn-primary"
+                        onClick={submitChatAnswer}
+                        disabled={!currentAnswer.trim()}
+                        style={{ padding: '0.4rem 1rem', fontSize: '0.8rem' }}
+                      >
+                        Send
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Final Scorecard UI */}
+                {showScorecard && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                    <div className="glass-card" style={{
+                      padding: '2rem',
+                      borderRadius: '1.25rem',
+                      border: '1.5px solid var(--color-primary)',
+                      background: 'linear-gradient(135deg, rgba(25, 15, 45, 0.4), rgba(10, 8, 20, 0.85))',
+                      boxShadow: '0 15px 35px rgba(139,92,246,0.15)',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+                        <div style={{
+                          width: '80px',
+                          height: '80px',
+                          borderRadius: '50%',
+                          background: 'rgba(139,92,246,0.1)',
+                          border: '2px solid var(--color-primary)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          boxShadow: '0 0 20px rgba(139,92,246,0.3)'
+                        }}>
+                          <span style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--color-primary-hover)' }}>
+                            {Math.round(
+                              Object.values(evaluations).reduce((acc, curr) => acc + (curr?.score || 0), 0) / 
+                              (Object.keys(evaluations).length || 1)
+                            )}
+                          </span>
+                          <span style={{ fontSize: '0.55rem', color: 'var(--text-dim)', fontWeight: 600 }}>/ 100</span>
                         </div>
                       </div>
-                    ))}
+                      <h4 style={{ fontSize: '1.1rem', color: 'var(--text-main)', fontWeight: 800, marginBottom: '0.25rem' }}>Interview Performance Scorecard</h4>
+                      <p style={{ fontSize: '0.78rem', color: 'var(--text-dim)', marginBottom: '1.25rem' }}>
+                        Here is the overall review of your practices based on accuracy, delivery structure, and STAR methods.
+                      </p>
+                      <button className="btn-primary" style={{ padding: '0.4rem 1.25rem', fontSize: '0.8rem' }} onClick={() => setShowScorecard(false)}>
+                        View Detailed Q&A Feedback
+                      </button>
+                    </div>
+
+                    {/* Question Feedback Cards list */}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                      {interviewPrep.map((q) => {
+                        const scoreData = evaluations[q.id];
+                        return (
+                          <div key={q.id} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', padding: '1.25rem', borderRadius: '0.75rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                              <span style={{ fontSize: '0.72rem', background: q.type === 'Technical' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(236, 72, 153, 0.15)', color: q.type === 'Technical' ? 'var(--color-accent)' : 'var(--color-secondary)', padding: '0.15rem 0.4rem', borderRadius: '4px', fontWeight: 'bold' }}>
+                                {q.type}
+                              </span>
+                              {scoreData && (
+                                <span style={{ fontSize: '0.78rem', fontWeight: 'bold', color: 'var(--color-primary-hover)' }}>
+                                  Score: {scoreData.score}/100
+                                </span>
+                              )}
+                            </div>
+                            <h5 style={{ fontSize: '0.88rem', color: 'var(--text-main)', marginBottom: '0.75rem', lineHeight: 1.4 }}>{q.question}</h5>
+                            
+                            {scoreData ? (
+                              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '0.75rem' }}>
+                                <div><strong>Strengths:</strong> {scoreData.strengths}</div>
+                                <div><strong>Weaknesses:</strong> {scoreData.weaknesses}</div>
+                                <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.55rem', borderRadius: '4px', marginTop: '0.25rem' }}>
+                                  <strong>STAR Model Answer:</strong>
+                                  <p style={{ marginTop: '0.25rem', italic: 'true', fontSize: '0.75rem', color: 'var(--text-main)', lineHeight: 1.4 }}>
+                                    {scoreData.modelAnswer}
+                                  </p>
+                                </div>
+                              </div>
+                            ) : (
+                              <div style={{ fontSize: '0.78rem', color: 'var(--text-dim)', fontStyle: 'italic' }}>
+                                Not practice-answered in this session.
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                ) : (
-                  <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '3rem' }}>No interview preparation cards predicted yet.</div>
+                )}
+
+                {/* Static Predicted Questions view */}
+                {!interviewActive && !showScorecard && (
+                  <div>
+                    {interviewPrep && interviewPrep.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                        {interviewPrep.map((q, idx) => (
+                          <div key={idx} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.04)', padding: '1.25rem', borderRadius: '0.75rem' }}>
+                            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                              <span style={{ fontSize: '0.75rem', background: q.type === 'Technical' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(236, 72, 153, 0.15)', color: q.type === 'Technical' ? 'var(--color-accent)' : 'var(--color-secondary)', padding: '0.15rem 0.4rem', borderRadius: '4px', fontWeight: 'bold' }}>
+                                {q.type}
+                              </span>
+                              <span style={{ fontSize: '0.75rem', color: 'var(--text-dim)' }}>Q#{q.id}</span>
+                            </div>
+                            <h4 style={{ fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: '0.75rem', lineHeight: '1.4' }}>{q.question}</h4>
+                            
+                            {/* Audio Speech Recording Interface */}
+                            <div style={{ background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '0.5rem', marginBottom: '1rem', border: '1px solid rgba(255,255,255,0.04)' }}>
+                              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-main)', fontWeight: 'bold' }}>Spoken Response Simulator</span>
+                                <button
+                                  className="btn-secondary"
+                                  onClick={() => handleRecordSpeech(q.id)}
+                                  style={{
+                                    padding: '0.25rem 0.5rem',
+                                    fontSize: '0.75rem',
+                                    background: recordingQuestionId === q.id ? 'var(--color-danger)' : 'transparent',
+                                    borderColor: recordingQuestionId === q.id ? 'transparent' : 'rgba(255,255,255,0.15)',
+                                    color: 'var(--text-main)',
+                                    gap: '0.25rem',
+                                    border: '1px solid rgba(255,255,255,0.08)',
+                                    cursor: 'pointer'
+                                  }}
+                                >
+                                  {recordingQuestionId === q.id ? <MicOff size={12} /> : <Mic size={12} />}
+                                  {recordingQuestionId === q.id ? 'Stop Dictating' : 'Speak Answer'}
+                                </button>
+                              </div>
+                              
+                              <textarea
+                                className="form-textarea"
+                                rows={3}
+                                placeholder="Click 'Speak Answer' to record, or type your practice response here..."
+                                value={transcripts[q.id] || ''}
+                                onChange={(e) => setTranscripts(prev => ({ ...prev, [q.id]: e.target.value }))}
+                                style={{ fontSize: '0.8rem', background: 'rgba(0,0,0,0.1)', border: '1px solid rgba(255,255,255,0.08)' }}
+                              />
+
+                              {transcripts[q.id] && (
+                                <button
+                                  className="btn-primary"
+                                  onClick={() => handleEvaluateAnswer(q.id, q.question)}
+                                  disabled={evalLoading[q.id]}
+                                  style={{ width: '100%', marginTop: '0.5rem', fontSize: '0.75rem', padding: '0.35rem 0.75rem' }}
+                                >
+                                  {evalLoading[q.id] ? 'Coaching Model Analyzing Spoken Answer...' : 'Evaluate Answer with AI Coach'}
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Speech Evaluation Diagnostics */}
+                            {evaluations[q.id] && (
+                              <div style={{ background: 'rgba(13, 10, 26, 0.5)', padding: '1rem', borderRadius: '0.5rem', border: '1.5px solid var(--color-primary)', marginTop: '0.75rem' }}>
+                                <div style={{ display: 'flex', justifycontent: 'space-between', alignItems: 'center', marginBottom: '0.5rem', display: 'flex', justifyContent: 'space-between' }}>
+                                  <h5 style={{ fontSize: '0.85rem', color: 'var(--text-main)', fontWeight: 'bold' }}>AI Evaluation Score</h5>
+                                  <span style={{ fontSize: '0.85rem', background: 'var(--color-primary)', color: 'var(--text-main)', padding: '0.15rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>
+                                    {evaluations[q.id].score}/100
+                                  </span>
+                                </div>
+                                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                  <div><strong>Strengths:</strong> {evaluations[q.id].strengths}</div>
+                                  <div><strong>Weaknesses:</strong> {evaluations[q.id].weaknesses}</div>
+                                  <div style={{ background: 'rgba(255,255,255,0.02)', padding: '0.5rem', borderRadius: '4px', marginTop: '0.25rem' }}>
+                                    <strong>Recommended Model Answer (STAR):</strong>
+                                    <p style={{ marginTop: '0.25rem', italic: 'true', fontSize: '0.75rem', color: 'var(--text-main)' }}>
+                                      {evaluations[q.id].modelAnswer}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+
+                            <div style={{ background: 'rgba(0,0,0,0.15)', padding: '0.75rem', borderRadius: '0.5rem', marginTop: '0.5rem' }}>
+                              <h5 style={{ fontSize: '0.8rem', color: 'var(--color-primary-hover)', marginBottom: '0.25rem' }}>Coaching Answer Tips:</h5>
+                              <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'var(--font-sans)', fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: '1.4' }}>
+                                {q.tips}
+                              </pre>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '3rem' }}>No mock interview practice predicted yet. Paste JD and generate.</div>
+                    )}
+                  </div>
                 )}
               </div>
             )}
