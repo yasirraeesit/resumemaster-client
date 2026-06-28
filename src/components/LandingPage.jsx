@@ -1,10 +1,130 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight, Zap, Target, PenTool, Flame, ListChecks, HelpCircle, Check, Award, Wand2, Globe, Heart, Shield, RefreshCw, FileText, FileUp, Sparkle, Plus } from 'lucide-react';
+import { Sparkles, ArrowRight, Zap, Target, PenTool, Flame, ListChecks, HelpCircle, Check, Award, Wand2, Globe, Heart, Shield, RefreshCw, FileText, FileUp, Sparkle, Plus, X } from 'lucide-react';
 import ResumeTemplateSlider from './ResumeTemplateSlider';
 
-export default function LandingPage({ onLaunchWorkspace, onSelectTemplates }) {
+export default function LandingPage({ onLaunchWorkspace, onSelectTemplates, onNavigateView }) {
   const [activeFaq, setActiveFaq] = useState(null);
   const [activeStep, setActiveStep] = useState(0);
+  const [modalContent, setModalContent] = useState(null);
+
+  const openFooterModal = (type, e) => {
+    e.preventDefault();
+    const content = {
+      xyz: {
+        title: "Google X-Y-Z Formula Guide",
+        body: (
+          <>
+            <p>The Google X-Y-Z formula is the industry gold standard for making resume action points high-impact:</p>
+            <div style={{ background: 'rgba(255,255,255,0.03)', padding: '0.75rem 1rem', borderRadius: '0.5rem', border: '1px solid rgba(255,255,255,0.05)', margin: '0.5rem 0', fontStyle: 'italic' }}>
+              "Accomplished [X], as measured by [Y], by doing [Z]"
+            </div>
+            <p><strong>X (Accomplished):</strong> The core outcome or project metric.</p>
+            <p><strong>Y (Measured by):</strong> The quantifiable scale, percentage, or volume of impact.</p>
+            <p><strong>Z (By doing):</strong> The exact technical tools, processes, or contributions you made.</p>
+            <p style={{ marginTop: '0.5rem', color: '#10b981', fontWeight: 500 }}>Example:</p>
+            <p style={{ color: 'var(--text-dim)', fontSize: '0.85rem' }}><em>"Optimized client databases (X), reducing query latency by 45% (Y), by implementing Redis caching queries and partitioning MongoDB indices (Z)."</em></p>
+          </>
+        )
+      },
+      ats: {
+        title: "Demystifying ATS Algorithms",
+        body: (
+          <>
+            <p>Applicant Tracking Systems (ATS) scan and rank resumes by matching keywords against job specifications.</p>
+            <p><strong>Optimize Your Resume:</strong></p>
+            <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <li><strong>Match Job Keywords:</strong> Ensure skills named in the target description appear exactly in your headings or highlights.</li>
+              <li><strong>ATS-Compliant Layout:</strong> Avoid graphic diagrams or text boxes that obscure key sections. Use clean columns (A4/Letter).</li>
+              <li><strong>Optimal Density:</strong> Keywords should flow naturally, aiming for a density of 2% to 4%.</li>
+            </ul>
+          </>
+        )
+      },
+      status: {
+        title: "System Infrastructure Status",
+        body: (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <p>ResumeMaster operations status overview:</p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.35rem' }}>
+              <span>🔐 Authentication Gateway</span>
+              <span style={{ color: '#10b981', fontWeight: 600 }}>Active (99.98% uptime)</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.35rem' }}>
+              <span>🧠 Gemini AI Processor</span>
+              <span style={{ color: '#10b981', fontWeight: 600 }}>Active (100% uptime)</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid rgba(255,255,255,0.05)', paddingBottom: '0.35rem' }}>
+              <span>💽 MongoDB Atlas Clusters</span>
+              <span style={{ color: '#10b981', fontWeight: 600 }}>Active (99.99% uptime)</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.35rem' }}>
+              <span>⚡ API Gateway Latency</span>
+              <span style={{ color: 'var(--color-primary-hover)', fontWeight: 600 }}>124ms (Optimal)</span>
+            </div>
+          </div>
+        )
+      },
+      privacy: {
+        title: "Privacy Policy Summary",
+        body: (
+          <>
+            <p>Your resume data is completely your own. Here is how we guarantee your privacy:</p>
+            <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <li><strong>End-to-End Encryption:</strong> All transactions and AI transmissions are secured with SSL keys.</li>
+              <li><strong>No Data Sharing:</strong> We do not distribute, sell, or analyze your content for third parties.</li>
+              <li><strong>Data Ownership:</strong> You can delete your saved resumes and delete your account from your Profile settings at any time.</li>
+            </ul>
+          </>
+        )
+      },
+      terms: {
+        title: "Terms of Service Highlights",
+        body: (
+          <>
+            <p>Welcome to ResumeMaster. By choosing to build with us, you agree to these core guidelines:</p>
+            <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <li><strong>Fair Usage limits:</strong> Respect API boundaries when generating cover letters and tailoring summaries.</li>
+              <li><strong>Authentic Profiles:</strong> Agree not to create misleading details when generating credentials.</li>
+              <li><strong>Service Provision:</strong> The engine is provided as-is to help structure your layout, with metrics provided by Google's framework guidelines.</li>
+            </ul>
+          </>
+        )
+      },
+      cookies: {
+        title: "Cookie Settings",
+        body: (
+          <>
+            <p>We use essential cookies and session variables to keep you signed in securely and store local draft modifications.</p>
+            <p><strong>Preferences:</strong></p>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '0.5rem 0.75rem', borderRadius: '0.375rem', marginTop: '0.5rem' }}>
+              <span>Enable session state logs</span>
+              <span style={{ color: '#10b981', fontWeight: 600 }}>Enabled</span>
+            </div>
+          </>
+        )
+      },
+      security: {
+        title: "Security Safeguards",
+        body: (
+          <>
+            <p>ResumeMaster implements multiple layers of protection to secure applicant profiles:</p>
+            <ul style={{ paddingLeft: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              <li><strong>Data Sanitization:</strong> All custom fields are sanitized to block XSS injection styles.</li>
+              <li><strong>Token Authentication:</strong> User actions require cryptographic JWT signatures verified on each server request.</li>
+              <li><strong>Database Protection:</strong> Data stores utilize private clustering to restrict access boundaries.</li>
+            </ul>
+          </>
+        )
+      }
+    };
+    if (content[type]) setModalContent(content[type]);
+  };
+
+  const handleHelpCenter = (e) => {
+    e.preventDefault();
+    const el = document.getElementById('faq');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
   
   // Interactive mockup state to show live AI polish simulation
   const [mockBulletText, setMockBulletText] = useState("• Wrote code for the frontend UI.");
@@ -528,11 +648,11 @@ export default function LandingPage({ onLaunchWorkspace, onSelectTemplates }) {
           <div className="footer-column">
             <h4>Resources</h4>
             <ul>
-              <li><a href="#" className="footer-link">Google XYZ Formula Guide</a></li>
-              <li><a href="#" className="footer-link">ATS Compatibility Blog</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigateView('xyz'); }} className="footer-link">Google XYZ Formula Guide</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigateView('ats'); }} className="footer-link">ATS Compatibility Blog</a></li>
               <li><a href="#" onClick={(e) => { e.preventDefault(); onSelectTemplates && onSelectTemplates(); }} className="footer-link">Resume Templates</a></li>
-              <li><a href="#" className="footer-link">Help Center</a></li>
-              <li><a href="#" className="footer-link">API Status</a></li>
+              <li><a href="#" onClick={handleHelpCenter} className="footer-link">Help Center</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigateView('status'); }} className="footer-link">API Status</a></li>
             </ul>
           </div>
 
@@ -540,10 +660,10 @@ export default function LandingPage({ onLaunchWorkspace, onSelectTemplates }) {
           <div className="footer-column">
             <h4>Legal</h4>
             <ul>
-              <li><a href="#" className="footer-link">Privacy Policy</a></li>
-              <li><a href="#" className="footer-link">Terms of Service</a></li>
-              <li><a href="#" className="footer-link">Cookie Preferences</a></li>
-              <li><a href="#" className="footer-link">Security Safeguards</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigateView('privacy'); }} className="footer-link">Privacy Policy</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigateView('terms'); }} className="footer-link">Terms of Service</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigateView('cookies'); }} className="footer-link">Cookie Preferences</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onNavigateView('security'); }} className="footer-link">Security Safeguards</a></li>
             </ul>
           </div>
 
@@ -559,6 +679,49 @@ export default function LandingPage({ onLaunchWorkspace, onSelectTemplates }) {
           </div>
         </div>
       </footer>
+
+      {/* Footer Info Modal Popup overlay */}
+      {modalContent && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(11,15,25,0.75)',
+          backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 9999,
+          padding: '1.5rem',
+          animation: 'tabFadeIn 0.2s ease'
+        }} onClick={() => setModalContent(null)}>
+          <div className="glass-card" style={{
+            maxWidth: '550px', width: '100%',
+            padding: '2rem',
+            borderRadius: '1rem',
+            border: '1px solid rgba(139,92,246,0.3)',
+            background: '#0b0f19',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+            position: 'relative'
+          }} onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setModalContent(null)}
+              style={{
+                position: 'absolute', top: '1.25rem', right: '1.25rem',
+                background: 'transparent', border: 'none', color: 'var(--text-dim)',
+                cursor: 'pointer'
+              }}
+            >
+              <X size={18} />
+            </button>
+            <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '1rem', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '0.5rem' }}>
+              {modalContent.title}
+            </h3>
+            <div style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: '1.6', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {modalContent.body}
+            </div>
+            <button className="btn-primary" style={{ marginTop: '1.5rem', width: '100%', padding: '0.65rem' }} onClick={() => setModalContent(null)}>
+              Close Guide
+            </button>
+          </div>
+        </div>
+      )}
 
     </div>
   );

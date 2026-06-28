@@ -36,6 +36,14 @@ export default function CareerSuite({ resumeData, token }) {
   const [evalLoading, setEvalLoading] = useState({});
   const [evaluations, setEvaluations] = useState({});
 
+  // LinkedIn Post Maker states
+  const [postTopic, setPostTopic] = useState('');
+  const [postTone, setPostTone] = useState('Professional');
+  const [postHookStyle, setPostHookStyle] = useState('Bold statement');
+  const [postUseEmojis, setPostUseEmojis] = useState(true);
+  const [postCta, setPostCta] = useState('None');
+  const [generatedPost, setGeneratedPost] = useState('');
+
   const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
 
   // Fetch saved documents if token is active
@@ -94,8 +102,12 @@ export default function CareerSuite({ resumeData, token }) {
   };
 
   const handleGenerate = async () => {
-    if (activeTool !== 'linkedin' && activeTool !== 'saved' && (!targetJd || targetJd.trim() === '')) {
+    if (activeTool !== 'linkedin' && activeTool !== 'saved' && activeTool !== 'linkedin-post' && (!targetJd || targetJd.trim() === '')) {
       alert('Please paste a target Job Description first.');
+      return;
+    }
+    if (activeTool === 'linkedin-post' && (!postTopic || postTopic.trim() === '')) {
+      alert('Please provide a post topic / objective.');
       return;
     }
     setLoading(true);
@@ -133,6 +145,21 @@ export default function CareerSuite({ resumeData, token }) {
         });
         const result = await res.json();
         setInterviewPrep(result.questions || []);
+      } else if (activeTool === 'linkedin-post') {
+        const res = await fetch(`${API_URL}/career/linkedin-post`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            resumeText: getFullResumeText(),
+            topic: postTopic,
+            tone: postTone,
+            hookStyle: postHookStyle,
+            useEmojis: postUseEmojis,
+            cta: postCta
+          })
+        });
+        const result = await res.json();
+        setGeneratedPost(result.post || '');
       }
     } catch (err) {
       alert('Failed to generate materials. Verify backend server is running on port 5001.');
@@ -438,6 +465,13 @@ export default function CareerSuite({ resumeData, token }) {
             <HelpCircle size={18} /> Mock Interview Prep (STT)
           </button>
           <button
+            className={`btn-secondary ${activeTool === 'linkedin-post' ? 'active' : ''}`}
+            style={{ justifyContent: 'flex-start', background: activeTool === 'linkedin-post' ? 'rgba(139,92,246,0.1)' : 'transparent', borderColor: activeTool === 'linkedin-post' ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)' }}
+            onClick={() => { setActiveTool('linkedin-post'); setCopied(false); }}
+          >
+            <Sparkles size={18} /> LinkedIn Post Maker
+          </button>
+          <button
             className={`btn-secondary ${activeTool === 'saved' ? 'active' : ''}`}
             style={{ justifyContent: 'flex-start', background: activeTool === 'saved' ? 'rgba(139,92,246,0.1)' : 'transparent', borderColor: activeTool === 'saved' ? 'var(--color-primary)' : 'rgba(255,255,255,0.06)' }}
             onClick={() => { setActiveTool('saved'); setCopied(false); }}
@@ -446,7 +480,7 @@ export default function CareerSuite({ resumeData, token }) {
           </button>
         </div>
 
-        {activeTool !== 'linkedin' && activeTool !== 'saved' && (
+        {activeTool !== 'linkedin' && activeTool !== 'saved' && activeTool !== 'linkedin-post' && (
           <div className="form-group">
             <label className="form-label">Target Job Description</label>
             <textarea
@@ -490,6 +524,127 @@ export default function CareerSuite({ resumeData, token }) {
           </div>
         )}
 
+        {activeTool === 'linkedin-post' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.25rem' }}>
+            {/* Topic/Objective */}
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: 'bold' }}>Post Topic / Goal</label>
+              <textarea
+                className="form-textarea"
+                rows={4}
+                placeholder="e.g. Announcing starting my new role as Frontend Engineer at Airbnb! Reflecting on my goals..."
+                value={postTopic}
+                onChange={(e) => setPostTopic(e.target.value)}
+                style={{ fontSize: '0.8rem' }}
+              />
+            </div>
+
+            {/* Hook & Tone selectors */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label" style={{ fontSize: '0.75rem' }}>Tone</label>
+                <select 
+                  className="form-input" 
+                  value={postTone} 
+                  onChange={(e) => setPostTone(e.target.value)}
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text-main)', fontSize: '0.8rem', padding: '0.4rem 0.5rem' }}
+                >
+                  <option value="Professional">Professional</option>
+                  <option value="Casual">Casual</option>
+                  <option value="Inspiring">Inspiring</option>
+                  <option value="Assertive">Assertive</option>
+                  <option value="Humorous">Humorous</option>
+                </select>
+              </div>
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label" style={{ fontSize: '0.75rem' }}>Hook Style</label>
+                <select 
+                  className="form-input" 
+                  value={postHookStyle} 
+                  onChange={(e) => setPostHookStyle(e.target.value)}
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text-main)', fontSize: '0.8rem', padding: '0.4rem 0.5rem' }}
+                >
+                  <option value="Bold statement">Bold statement</option>
+                  <option value="Question">Question</option>
+                  <option value="Story opening">Story opening</option>
+                  <option value="Statistic">Statistic</option>
+                </select>
+              </div>
+            </div>
+
+            {/* CTA & Emojis toggle */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label" style={{ fontSize: '0.75rem' }}>Call-to-Action</label>
+                <select 
+                  className="form-input" 
+                  value={postCta} 
+                  onChange={(e) => setPostCta(e.target.value)}
+                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)', color: 'var(--text-main)', fontSize: '0.8rem', padding: '0.4rem 0.5rem' }}
+                >
+                  <option value="None">None</option>
+                  <option value="Let's connect">Let's connect</option>
+                  <option value="Read my blog">Read my blog</option>
+                  <option value="Leave a comment">Leave a comment</option>
+                </select>
+              </div>
+              <div className="form-group" style={{ margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: '1.2rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', color: 'var(--text-muted)', cursor: 'pointer', userSelect: 'none' }}>
+                  <input 
+                    type="checkbox"
+                    checked={postUseEmojis}
+                    onChange={(e) => setPostUseEmojis(e.target.checked)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  Include Emojis
+                </label>
+              </div>
+            </div>
+
+            {/* Template Library */}
+            <div style={{ marginTop: '0.25rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem' }}>
+              <label className="form-label" style={{ fontWeight: 'bold', fontSize: '0.75rem', color: 'var(--color-primary-hover)', display: 'block', marginBottom: '0.35rem' }}>
+                Quick Templates Library
+              </label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                {[
+                  { label: '🚀 Just Joined / New Role', topic: 'Sharing that I am starting a new position as [Job Title] at [Company]! Reflecting on what I look forward to.', tone: 'Inspiring', hook: 'Story opening', cta: "Let's connect" },
+                  { label: '🔍 Job Hunting / Open to Opportunities', topic: 'Sharing that I am actively looking for new opportunities in [Specialty] role. Reflecting on my main skills and project success.', tone: 'Professional', hook: 'Bold statement', cta: "Let's connect" },
+                  { label: '💻 Project Launch / Hackathon', topic: 'Launching my new project: [Project Name]! Built using [Stack]. Solve the problem of [Problem]. Check it out!', tone: 'Enthusiastic', hook: 'Bold statement', cta: "Leave a comment" },
+                  { label: '💡 Technical Insight Summary', topic: 'Sharing key technical takeaways about [Tech / Skill] and how it improves product scalability and developers efficiency.', tone: 'Casual', hook: 'Question', cta: "Leave a comment" },
+                  { label: '🙏 Work Anniversary Reflections', topic: 'Celebrating 1 year at my current job! Gratitude to my team and reflections on my growth.', tone: 'Casual', hook: 'Statistic', cta: "None" }
+                ].map((tpl) => (
+                  <button
+                    key={tpl.label}
+                    type="button"
+                    className="btn-secondary"
+                    onClick={() => {
+                      setPostTopic(tpl.topic);
+                      setPostTone(tpl.tone);
+                      setPostHookStyle(tpl.hook);
+                      setPostCta(tpl.cta);
+                    }}
+                    style={{
+                      padding: '0.35rem 0.5rem',
+                      fontSize: '0.7rem',
+                      textAlign: 'left',
+                      justifyContent: 'flex-start',
+                      border: '1px solid rgba(255,255,255,0.04)',
+                      background: 'rgba(255,255,255,0.01)',
+                      width: '100%',
+                      lineHeight: 1.3
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'rgba(255,255,255,0.01)'}
+                  >
+                    {tpl.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
         {activeTool !== 'saved' && (
           <button className="btn-primary" onClick={handleGenerate} disabled={loading}>
             {loading ? 'Analyzing & Tailoring...' : 'Generate AI Materials'}
@@ -519,6 +674,90 @@ export default function CareerSuite({ resumeData, token }) {
         ) : (
           <div>
             
+            {/* LinkedIn Post Maker */}
+            {activeTool === 'linkedin-post' && (
+              <div>
+                {generatedPost ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <input
+                          type="text"
+                          className="form-input"
+                          placeholder="Post Save Title (e.g. Google Promotion Announcement)"
+                          value={saveTitle}
+                          onChange={(e) => setSaveTitle(e.target.value)}
+                          style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', width: '250px' }}
+                        />
+                        <button className="btn-primary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', gap: '0.25rem' }} onClick={() => handleSaveDoc('linkedin_post', generatedPost)} disabled={savingDoc}>
+                          <Save size={12} /> Save to Profile
+                        </button>
+                      </div>
+                      <button className="btn-secondary" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', gap: '0.25rem' }} onClick={() => handleCopy(generatedPost)}>
+                        <Copy size={12} /> Copy Post
+                      </button>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '7fr 3fr', gap: '1.25rem', marginTop: '0.5rem' }}>
+                      {/* Left: Interactive Editor Textarea */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        <textarea
+                          className="form-textarea"
+                          rows={15}
+                          value={generatedPost}
+                          onChange={(e) => setGeneratedPost(e.target.value)}
+                          style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: '0.88rem',
+                            color: 'var(--text-muted)',
+                            background: 'rgba(0,0,0,0.2)',
+                            padding: '1.25rem',
+                            borderRadius: '0.75rem',
+                            border: '1px solid rgba(255,255,255,0.05)',
+                            lineHeight: '1.6',
+                            resize: 'vertical'
+                          }}
+                        />
+                      </div>
+
+                      {/* Right: Metrics Panel */}
+                      <div className="glass-card" style={{ background: 'rgba(255,255,255,0.01)', border: '1px solid rgba(255,255,255,0.04)', padding: '1rem', borderRadius: '0.75rem', height: 'fit-content' }}>
+                        <h4 style={{ fontSize: '0.85rem', color: 'var(--color-primary-hover)', display: 'flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.75rem', fontWeight: 'bold' }}>
+                          <Sparkles size={14} /> Post Analytics
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', fontSize: '0.78rem' }}>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)' }}>Character Count:</span>
+                            <div style={{ fontSize: '1.2rem', fontWeight: 800, color: generatedPost.length > 3000 ? '#ef4444' : 'var(--text-main)', marginTop: '0.2rem' }}>
+                              {generatedPost.length} / 3000
+                            </div>
+                            {generatedPost.length > 3000 && (
+                              <div style={{ color: '#ef4444', fontSize: '0.68rem', marginTop: '0.2rem' }}>
+                                Warning: LinkedIn posts are limited to 3,000 characters.
+                              </div>
+                            )}
+                          </div>
+                          <div>
+                            <span style={{ color: 'var(--text-muted)' }}>Estimated Read Time:</span>
+                            <div style={{ fontSize: '1rem', fontWeight: 'bold', color: 'var(--text-main)', marginTop: '0.2rem' }}>
+                              {Math.ceil(generatedPost.split(/\s+/).filter(Boolean).length / 200)} min read
+                            </div>
+                          </div>
+                          <div style={{ borderTop: '1px solid rgba(255,255,255,0.04)', paddingTop: '0.5rem', color: 'var(--text-dim)', fontSize: '0.7rem', lineHeight: 1.4 }}>
+                            Tip: Posts under 1,500 characters usually see 20% higher click-through rates. Keep it concise!
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', color: 'var(--text-dim)', padding: '3rem' }}>
+                    No LinkedIn post generated yet. Select a template or fill in the topic details and click generate.
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Cover Letter */}
             {activeTool === 'cover' && (
               <div>
@@ -985,8 +1224,15 @@ export default function CareerSuite({ resumeData, token }) {
                       <div key={doc._id} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', padding: '1.25rem', borderRadius: '0.75rem' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                            <span style={{ fontSize: '0.7rem', background: doc.type === 'cover_letter' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(236, 72, 153, 0.15)', color: doc.type === 'cover_letter' ? 'var(--color-accent)' : 'var(--color-secondary)', padding: '0.15rem 0.4rem', borderRadius: '4px', fontWeight: 'bold' }}>
-                              {doc.type === 'cover_letter' ? 'Cover Letter' : 'LinkedIn Opt'}
+                            <span style={{
+                              fontSize: '0.7rem',
+                              background: doc.type === 'cover_letter' ? 'rgba(59, 130, 246, 0.15)' : doc.type === 'linkedin_post' ? 'rgba(16, 185, 129, 0.15)' : 'rgba(236, 72, 153, 0.15)',
+                              color: doc.type === 'cover_letter' ? 'var(--color-accent)' : doc.type === 'linkedin_post' ? '#34d399' : 'var(--color-secondary)',
+                              padding: '0.15rem 0.4rem',
+                              borderRadius: '4px',
+                              fontWeight: 'bold'
+                            }}>
+                              {doc.type === 'cover_letter' ? 'Cover Letter' : doc.type === 'linkedin_post' ? 'LinkedIn Post' : 'LinkedIn Profile'}
                             </span>
                             <h4 style={{ color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 'bold' }}>{doc.title}</h4>
                           </div>
@@ -1000,7 +1246,7 @@ export default function CareerSuite({ resumeData, token }) {
                           </div>
                         </div>
                         
-                        {doc.type === 'cover_letter' ? (
+                        {doc.type === 'cover_letter' || doc.type === 'linkedin_post' ? (
                           <pre style={{ whiteSpace: 'pre-wrap', fontFamily: 'var(--font-sans)', fontSize: '0.8rem', color: 'var(--text-muted)', background: 'rgba(0,0,0,0.15)', padding: '0.75rem', borderRadius: '0.5rem', maxHeight: '180px', overflowY: 'auto' }}>
                             {doc.content}
                           </pre>

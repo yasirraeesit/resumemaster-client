@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   FileText, Briefcase, Award, TrendingUp,
-  PlusCircle, ChevronRight, BarChart2, Clock, Star
+  PlusCircle, ChevronRight, BarChart2, Clock, Star, Bot
 } from 'lucide-react';
 
 // Animated counter hook
@@ -100,9 +100,9 @@ export default function Dashboard({ user, token, onNavigate, resumeData }) {
   };
 
   const QUICK_ACTIONS = [
-    { label: 'Resume Builder',    tab: 'builder',  Icon: FileText, color: '#10b981', desc: 'Edit & export your resume' },
-    { label: 'Career Copilot',   tab: 'copilot',  Icon: Award,    color: '#a78bfa', desc: 'AI cover letters & mock interviews' },
-    { label: 'Job Tracker',       tab: 'tracker',  Icon: Briefcase,color: '#3b82f6', desc: 'Track your applications' },
+    { label: 'Resume Builder Workspace', tab: 'builder',  Icon: FileText, color: '#10b981', desc: 'Craft, align, and customize your resume distraction-free.' },
+    { label: 'AI Career Copilot Suite',   tab: 'copilot',  Icon: Award,    color: '#a78bfa', desc: 'Generate cover letters, mock interviews, and LinkedIn posts.' },
+    { label: 'Job Application CRM Board', tab: 'tracker',  Icon: Briefcase,color: '#3b82f6', desc: 'Track job pipelines, stages, and linked documents.' },
   ];
 
   const greeting = () => {
@@ -115,36 +115,53 @@ export default function Dashboard({ user, token, onNavigate, resumeData }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', paddingBottom: '2rem' }}>
 
-      {/* Welcome Banner */}
+      {/* Welcome Banner (AI Guide David Portal) */}
       <div className="glass-card" style={{
-        background: 'linear-gradient(135deg, rgba(79,70,229,0.15) 0%, rgba(139,92,246,0.1) 50%, rgba(236,72,153,0.08) 100%)',
-        border: '1px solid rgba(139,92,246,0.25)',
+        background: 'linear-gradient(135deg, rgba(79,70,229,0.18) 0%, rgba(139,92,246,0.12) 50%, rgba(16,185,129,0.06) 100%)',
+        border: '1px solid rgba(139,92,246,0.28)',
         borderRadius: '1.25rem',
         padding: '2rem 2.5rem',
         display: 'flex',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        flexWrap: 'wrap',
-        gap: '1.5rem',
+        gap: '2rem',
+        flexWrap: 'wrap'
       }}>
-        <div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.35rem', fontWeight: 500 }}>
-            {greeting()},
+        {/* Animated AI David Consciousness Orb */}
+        <div style={{
+          width: 80, height: 80, borderRadius: '50%',
+          background: 'linear-gradient(135deg, #a78bfa 0%, #3b82f6 100%)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          flexShrink: 0,
+          boxShadow: '0 0 20px rgba(139,92,246,0.4)',
+          position: 'relative',
+          animation: 'pulse 3s infinite ease-in-out'
+        }}>
+          <div style={{
+            width: 70, height: 70, borderRadius: '50%',
+            background: 'var(--color-bg-dark, #0b0f19)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center'
+          }}>
+            <Bot size={32} style={{ color: '#c084fc', filter: 'drop-shadow(0 0 8px #a78bfa)' }} />
           </div>
-          <h1 style={{ fontSize: '2rem', fontWeight: 900, color: 'var(--text-main)', marginBottom: '0.4rem' }}>
-            {user?.fullName || 'Welcome back'} 👋
-          </h1>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-            Here's your career progress at a glance.
+          {/* Rotating ring */}
+          <div style={{
+            position: 'absolute', top: -5, left: -5, right: -5, bottom: -5,
+            borderRadius: '50%', border: '2px dashed rgba(167,139,250,0.4)',
+            animation: 'spin 12s linear infinite'
+          }} />
+        </div>
+
+        <div style={{ flex: 1, minWidth: '280px' }}>
+          <div style={{ fontSize: '0.7rem', background: 'rgba(167,139,250,0.12)', color: '#c084fc', padding: '0.2rem 0.6rem', borderRadius: '20px', width: 'fit-content', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+            David • AI Assistant Guide
+          </div>
+          <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+            {greeting()}, {user?.fullName || 'Career Builder'}!
+          </h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.88rem', lineHeight: '1.55', margin: 0 }}>
+            "Welcome back! Today we have tracked <strong>{stats.jobs} job applications</strong> and saved <strong>{stats.resumes} resume layouts</strong>. Click any pathway card below to launch a tool. I will hide all unrelated dashboard noise so you can focus completely distraction-free."
           </p>
         </div>
-        <button
-          className="btn-primary"
-          style={{ padding: '0.75rem 1.5rem', fontSize: '0.95rem', gap: '0.5rem' }}
-          onClick={() => onNavigate('builder')}
-        >
-          <PlusCircle size={18} /> Build New Resume
-        </button>
       </div>
 
       {/* Stats Row */}
@@ -174,11 +191,10 @@ export default function Dashboard({ user, token, onNavigate, resumeData }) {
 
       {/* Quick Actions + Activity Feed */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '1.5rem' }}>
-
-        {/* Quick Actions */}
+        {/* Navigation Pathways */}
         <div className="glass-card" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <h2 style={{ fontSize: '1rem', color: 'var(--text-main)', fontWeight: 700, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <TrendingUp size={18} style={{ color: 'var(--color-primary)' }} /> Quick Actions
+            <TrendingUp size={18} style={{ color: 'var(--color-primary-hover)' }} /> Navigation Pathways
           </h2>
           {QUICK_ACTIONS.map(({ label, tab, Icon, color, desc }) => (
             <button
@@ -199,11 +215,13 @@ export default function Dashboard({ user, token, onNavigate, resumeData }) {
               }}
               onMouseEnter={e => {
                 e.currentTarget.style.background = 'rgba(139,92,246,0.07)';
-                e.currentTarget.style.borderColor = 'rgba(139,92,246,0.2)';
+                e.currentTarget.style.borderColor = 'rgba(139,92,246,0.25)';
+                e.currentTarget.style.transform = 'translateX(4px)';
               }}
               onMouseLeave={e => {
                 e.currentTarget.style.background = 'rgba(255,255,255,0.025)';
                 e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                e.currentTarget.style.transform = 'none';
               }}
             >
               <div style={{

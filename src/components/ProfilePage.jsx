@@ -101,8 +101,9 @@ export default function ProfilePage({ user, token, resumeData, onNavigate, onGoS
       const recent = [
         ...(Array.isArray(documentsData) ? documentsData.map(d => ({
           id: d._id || d.id,
-          icon: Award, color: '#a78bfa',
-          label: d.type === 'cover_letter' ? 'Cover Letter' : 'LinkedIn Opt.',
+          icon: d.type === 'linkedin_post' ? Sparkles : Award,
+          color: d.type === 'cover_letter' ? '#a78bfa' : d.type === 'linkedin_post' ? '#10b981' : '#3b82f6',
+          label: d.type === 'cover_letter' ? 'Cover Letter' : d.type === 'linkedin_post' ? 'LinkedIn Post' : 'LinkedIn Profile',
           title: d.title,
           time:  d.createdAt,
           fullDoc: d
@@ -606,11 +607,11 @@ export default function ProfilePage({ user, token, resumeData, onNavigate, onGoS
                       alignSelf: 'flex-start',
                       padding: '0.15rem 0.4rem',
                       borderRadius: '4px',
-                      background: 'rgba(167,139,250,0.1)',
-                      color: '#a78bfa',
+                      background: d.type === 'cover_letter' ? 'rgba(167,139,250,0.1)' : d.type === 'linkedin_post' ? 'rgba(16,185,129,0.1)' : 'rgba(59,130,246,0.1)',
+                      color: d.type === 'cover_letter' ? '#a78bfa' : d.type === 'linkedin_post' ? '#10b981' : '#60a5fa',
                       fontWeight: 'bold'
                     }}>
-                      Cover Letter
+                      {d.type === 'cover_letter' ? 'Cover Letter' : d.type === 'linkedin_post' ? 'LinkedIn Post' : 'LinkedIn Profile'}
                     </span>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.03)', paddingTop: '0.5rem' }}>
@@ -794,10 +795,12 @@ export default function ProfilePage({ user, token, resumeData, onNavigate, onGoS
             </div>
 
             <span style={{
-              fontSize: '0.7rem', color: '#a78bfa', background: 'rgba(167,139,250,0.1)',
+              fontSize: '0.7rem',
+              color: previewDoc.type === 'cover_letter' ? '#a78bfa' : previewDoc.type === 'linkedin_post' ? '#10b981' : '#60a5fa',
+              background: previewDoc.type === 'cover_letter' ? 'rgba(167,139,250,0.1)' : previewDoc.type === 'linkedin_post' ? 'rgba(16,185,129,0.1)' : 'rgba(59,130,246,0.1)',
               padding: '0.15rem 0.4rem', borderRadius: '4px', alignSelf: 'flex-start', fontWeight: 'bold'
             }}>
-              Cover Letter
+              {previewDoc.type === 'cover_letter' ? 'Cover Letter' : previewDoc.type === 'linkedin_post' ? 'LinkedIn Post' : 'LinkedIn Profile'}
             </span>
 
             {/* Document Content Display */}

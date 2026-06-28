@@ -9,6 +9,7 @@ import ProfilePage    from './components/ProfilePage';
 import SettingsPage   from './components/SettingsPage';
 import Dashboard      from './components/Dashboard';
 import TemplatesLibraryPage from './components/TemplatesLibraryPage';
+import InfoPage             from './components/InfoPage';
 import { ToastProvider } from './components/Toast';
 import {
   FileText, Briefcase, Award,
@@ -303,7 +304,14 @@ export default function App() {
   const goToWorkspace = useCallback(() => navigate('dashboard'), [navigate]);
   const goToProfile   = useCallback(() => navigate('profile'),   [navigate]);
   const goToSettings  = useCallback(() => navigate('settings'),  [navigate]);
-  const goToLanding   = useCallback(() => setView('landing'),    []);
+  const goToLanding   = useCallback(() => {
+    if (user) {
+      setView('workspace');
+      setActiveTab('dashboard');
+    } else {
+      setView('landing');
+    }
+  }, [user]);
 
   const handleAuthSuccess = (newToken, newUser) => {
     setToken(newToken);
@@ -395,26 +403,78 @@ export default function App() {
     onLogout:      handleLogout,
   };
 
+  /* ── Info / Legal Pages ─────────────────────────────────────────── */
+  const infoPages = ['xyz', 'ats', 'status', 'privacy', 'terms', 'cookies', 'security'];
+  if (infoPages.includes(view)) {
+    return (
+      <ToastProvider>
+        <div>
+          <AppHeader {...headerProps} />
+          <main className="app-container" style={{ paddingTop: '2.5rem', paddingBottom: '3rem' }}>
+            <InfoPage 
+              pageType={view} 
+              onBack={() => {
+                if (user) {
+                  setView('workspace');
+                  setActiveTab('dashboard');
+                } else {
+                  setView('landing');
+                }
+              }}
+              onLaunchWorkspace={() => user ? goToWorkspace() : setView('register')} 
+              user={user} 
+            />
+          </main>
+        </div>
+      </ToastProvider>
+    );
+  }
+
   /* ── Landing ────────────────────────────────────────────────────── */
   if (view === 'landing') {
+    if (user) {
+      setView('workspace');
+      setActiveTab('dashboard');
+      return null;
+    }
     return (
       <ToastProvider>
         <div>
           <AppHeader {...headerProps}>
             <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
-              <a href="#features" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>Features</a>
-              <a href="#templates" onClick={handleTemplatesClick} style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>Templates</a>
-              <a href="#faq" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>FAQ</a>
-              {user && (
-                <button className="btn-secondary" style={{ padding: '0.45rem 0.9rem', fontSize: '0.82rem', marginLeft: '0.5rem' }} onClick={goToWorkspace}>
-                  Go to Workspace
-                </button>
-              )}
+              <a
+                href="#"
+                onClick={(e) => { e.preventDefault(); setView('register'); }}
+                style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', transition: 'color 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+              >
+                Resume Builder
+              </a>
+              <a
+                href="#"
+                onClick={(e) => { e.preventDefault(); setView('register'); }}
+                style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', transition: 'color 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+              >
+                Career Copilot
+              </a>
+              <a
+                href="#"
+                onClick={(e) => { e.preventDefault(); setView('register'); }}
+                style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', transition: 'color 0.2s' }}
+                onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+                onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}
+              >
+                Job Tracker
+              </a>
             </div>
           </AppHeader>
           <LandingPage 
             onLaunchWorkspace={() => user ? goToWorkspace() : setView('register')} 
             onSelectTemplates={handleTemplatesClick}
+            onNavigateView={(viewName) => setView(viewName)}
           />
         </div>
       </ToastProvider>
@@ -426,17 +486,47 @@ export default function App() {
     <ToastProvider>
       <div>
         <AppHeader {...headerProps}>
-          <nav className="nav-tabs">
-            {NAV_TABS.map(({ key, label, Icon }) => (
-              <button
-                key={key}
-                className={`tab-btn ${activeTab === key ? 'active' : ''}`}
-                onClick={() => setActiveTab(key)}
-              >
-                <Icon size={15} /> {label}
-              </button>
-            ))}
-          </nav>
+          {['builder', 'copilot', 'tracker', 'templates'].includes(activeTab) ? (
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className="btn-secondary"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                padding: '0.45rem 0.85rem',
+                fontSize: '0.82rem',
+                borderRadius: '0.5rem',
+                border: '1px solid rgba(255,255,255,0.08)',
+                background: 'rgba(255,255,255,0.02)',
+                color: 'var(--text-main)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.15)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
+              }}
+            >
+              ← Back to Dashboard Hub
+            </button>
+          ) : (
+            <nav className="nav-tabs">
+              {NAV_TABS.map(({ key, label, Icon }) => (
+                <button
+                  key={key}
+                  className={`tab-btn ${activeTab === key ? 'active' : ''}`}
+                  onClick={() => setActiveTab(key)}
+                >
+                  <Icon size={15} /> {label}
+                </button>
+              ))}
+            </nav>
+          )}
         </AppHeader>
 
         <main className="app-container" style={{ paddingTop: '1.5rem', paddingBottom: '1.5rem' }}>

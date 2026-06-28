@@ -1,5 +1,30 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Sparkles, FileText, Download, Save, Plus, Trash2, ArrowRight, Target, X, CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
+import { 
+  Sparkles, FileText, Download, Save, Plus, Trash2, ArrowRight, Target, X, 
+  CheckCircle, XCircle, AlertTriangle, Sliders, Settings, Bot, Zap, 
+  Lightbulb, Wrench, Activity, ChevronUp, Edit2, Play, Users, BarChart2, 
+  Shield, HelpCircle, Menu, Award 
+} from 'lucide-react';
+
+const getPatternIcon = (name, size = 14) => {
+  const mapping = {
+    zap: <Zap size={size} style={{ color: '#f472b6' }} />,
+    lightbulb: <Lightbulb size={size} style={{ color: '#f59e0b' }} />,
+    wrench: <Wrench size={size} style={{ color: '#3b82f6' }} />,
+    target: <Target size={size} style={{ color: '#10b981' }} />,
+    check: <CheckCircle size={size} style={{ color: '#10b981' }} />,
+    activity: <Activity size={size} style={{ color: '#a78bfa' }} />,
+    file: <FileText size={size} style={{ color: '#60a5fa' }} />,
+    trending: <BarChart2 size={size} style={{ color: '#10b981' }} />,
+    users: <Users size={size} style={{ color: '#a78bfa' }} />,
+    shield: <Shield size={size} style={{ color: '#f472b6' }} />,
+    award: <Award size={size} style={{ color: '#a78bfa' }} />,
+    help: <HelpCircle size={size} style={{ color: '#c084fc' }} />,
+    sliders: <Sliders size={size} style={{ color: '#10b981' }} />,
+    settings: <Settings size={size} style={{ color: '#3b82f6' }} />
+  };
+  return mapping[name] || <AlertTriangle size={size} style={{ color: '#f59e0b' }} />;
+};
 
 export default function ResumeBuilder({ resumeData, setResumeData, token, onTriggerAuth }) {
   const [activeSubTab, setActiveSubTab] = useState('personal');
@@ -20,6 +45,8 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
     lineHeight: 1.45,
     margin: 12,
     accentColor: '#3b82f6',
+    fontFamily: 'Plus Jakarta Sans',
+    sectionSpacing: 12,
     showCustomizer: false
   });
 
@@ -164,29 +191,29 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
 
   // ── Passive Bullet Point Weak-Word Scanner ─────────────────────────
   const WEAK_PATTERNS = [
-    { regex: /^(worked on|work on)/i,                suggestion: 'Led', icon: '⚡' },
-    { regex: /^(helped with|helped)/i,               suggestion: 'Contributed to', icon: '💡' },
-    { regex: /^(assisted|assisting)/i,               suggestion: 'Supported', icon: '🔧' },
-    { regex: /^(responsible for)/i,                  suggestion: 'Owned', icon: '🎯' },
-    { regex: /^(did|does|doing)/i,                   suggestion: 'Executed', icon: '✅' },
-    { regex: /^(made)/i,                             suggestion: 'Built / Engineered', icon: '🏗️' },
-    { regex: /^(was in charge of)/i,                 suggestion: 'Managed', icon: '📋' },
-    { regex: /^(tried to|tried)/i,                   suggestion: 'Spearheaded / Achieved', icon: '🚀' },
-    { regex: /^(used|using)/i,                       suggestion: 'Leveraged', icon: '⚙️' },
-    { regex: /^(got)/i,                              suggestion: 'Delivered', icon: '📦' },
-    { regex: /^(wrote)/i,                            suggestion: 'Authored / Developed', icon: '✍️' },
-    { regex: /^(fixed)/i,                            suggestion: 'Resolved / Optimized', icon: '🔩' },
-    { regex: /^(participated in|participated)/i,     suggestion: 'Collaborated on / Driven', icon: '🤝' },
-    { regex: /^(utilize|utilized)/i,                 suggestion: 'Leveraged / Deployed', icon: '⚙️' },
-    { regex: /^(managed to|managed)/i,               suggestion: 'Orchestrated / Directed', icon: '👑' },
-    { regex: /^(handled)/i,                          suggestion: 'Oversaw / Administered', icon: '💼' },
-    { regex: /^(guided)/i,                           suggestion: 'Mentored / Facilitated', icon: '🌱' },
-    { regex: /^(created)/i,                          suggestion: 'Designed / Innovated', icon: '🎨' },
-    { regex: /^(improved)/i,                         suggestion: 'Enhanced / Boosted', icon: '📈' },
-    { regex: /\bvarious\b/i,                         suggestion: 'List specific examples instead of "various"', icon: '📝' },
-    { regex: /\bseveral\b/i,                         suggestion: 'Be specific — use numbers like "5+ projects"', icon: '🔢' },
-    { regex: /\bsome\b/i,                            suggestion: 'Quantify — avoid vague "some"', icon: '📊' },
-    { regex: /\b(dynamic|motivated|team player|detail-oriented)\b/i, suggestion: 'Show impact instead of using clichés', icon: '📣' }
+    { regex: /^(worked on|work on)/i,                suggestion: 'Led', icon: 'zap' },
+    { regex: /^(helped with|helped)/i,               suggestion: 'Contributed to', icon: 'lightbulb' },
+    { regex: /^(assisted|assisting)/i,               suggestion: 'Supported', icon: 'wrench' },
+    { regex: /^(responsible for)/i,                  suggestion: 'target' },
+    { regex: /^(did|does|doing)/i,                   suggestion: 'Executed', icon: 'check' },
+    { regex: /^(made)/i,                             suggestion: 'Built / Engineered', icon: 'wrench' },
+    { regex: /^(was in charge of)/i,                 suggestion: 'Managed', icon: 'shield' },
+    { regex: /^(tried to|tried)/i,                   suggestion: 'Spearheaded / Achieved', icon: 'zap' },
+    { regex: /^(used|using)/i,                       suggestion: 'sliders', icon: 'sliders' },
+    { regex: /^(got)/i,                              suggestion: 'Delivered', icon: 'activity' },
+    { regex: /^(wrote)/i,                            suggestion: 'Authored / Developed', icon: 'file' },
+    { regex: /^(fixed)/i,                            suggestion: 'Resolved / Optimized', icon: 'wrench' },
+    { regex: /^(participated in|participated)/i,     suggestion: 'Collaborated on / Driven', icon: 'users' },
+    { regex: /^(utilize|utilized)/i,                 suggestion: 'Leveraged / Deployed', icon: 'sliders' },
+    { regex: /^(managed to|managed)/i,               suggestion: 'Orchestrated / Directed', icon: 'award' },
+    { regex: /^(handled)/i,                          suggestion: 'Oversaw / Administered', icon: 'shield' },
+    { regex: /^(guided)/i,                           suggestion: 'Mentored / Facilitated', icon: 'lightbulb' },
+    { regex: /^(created)/i,                          suggestion: 'Designed / Innovated', icon: 'activity' },
+    { regex: /^(improved)/i,                         suggestion: 'Enhanced / Boosted', icon: 'trending' },
+    { regex: /\bvarious\b/i,                         suggestion: 'List specific examples instead of "various"', icon: 'file' },
+    { regex: /\bseveral\b/i,                         suggestion: 'Be specific — use numbers like "5+ projects"', icon: 'trending' },
+    { regex: /\bsome\b/i,                            suggestion: 'Quantify — avoid vague "some"', icon: 'trending' },
+    { regex: /\b(dynamic|motivated|team player|detail-oriented)\b/i, suggestion: 'Show impact instead of using clichés', icon: 'help' }
   ];
 
   const bulletWarnings = useMemo(() => {
@@ -880,7 +907,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                 </p>
                 {bulletWarnings.map((w, i) => (
                   <div key={i} style={{ display: 'grid', gridTemplateColumns: '1.2rem 1fr auto', gap: '0.5rem', alignItems: 'start', background: 'rgba(245,158,11,0.05)', border: '1px solid rgba(245,158,11,0.1)', padding: '0.6rem 0.75rem', borderRadius: '0.5rem', fontSize: '0.78rem' }}>
-                    <span>{w.icon}</span>
+                    <span>{getPatternIcon(w.icon, 13)}</span>
                     <div>
                       <div style={{ color: 'var(--text-dim)', marginBottom: '0.15rem' }}>
                         <em>"{w.line.length > 65 ? w.line.slice(0, 65) + '…' : w.line}"</em>
@@ -1152,9 +1179,17 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1rem' }}>
               <div>
                 <h4 style={{ fontSize: '0.95rem', color: 'var(--text-main)', marginBottom: '0.2rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                  📄 Import Preview
-                  <span style={{ fontSize: '0.7rem', background: importPreview.method === 'gemini' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: importPreview.method === 'gemini' ? '#10b981' : '#f59e0b', padding: '0.1rem 0.4rem', borderRadius: '9999px', fontWeight: 600 }}>
-                    {importPreview.method === 'gemini' ? '✨ AI Parsed' : '⚙️ Heuristic'}
+                  <FileText size={16} style={{ color: 'var(--color-primary-hover)' }} /> Import Preview
+                  <span style={{ fontSize: '0.7rem', background: importPreview.method === 'gemini' ? 'rgba(16,185,129,0.15)' : 'rgba(245,158,11,0.15)', color: importPreview.method === 'gemini' ? '#10b981' : '#f59e0b', padding: '0.2rem 0.5rem', borderRadius: '9999px', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                    {importPreview.method === 'gemini' ? (
+                      <>
+                        <Sparkles size={11} /> AI Parsed
+                      </>
+                    ) : (
+                      <>
+                        <Sliders size={11} /> Heuristic
+                      </>
+                    )}
                   </span>
                 </h4>
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Review the extracted data before loading it into the builder.</p>
@@ -1584,16 +1619,19 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                 fontSize: '0.8rem', 
                 borderColor: layoutSettings.showCustomizer ? 'var(--color-primary)' : 'rgba(255,255,255,0.1)', 
                 background: layoutSettings.showCustomizer ? 'rgba(139,92,246,0.1)' : 'rgba(255,255,255,0.025)',
-                color: 'var(--text-main)'
+                color: 'var(--text-main)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.3rem'
               }} 
               onClick={() => setLayoutSettings(prev => ({ ...prev, showCustomizer: !prev.showCustomizer }))}
             >
-              ⚙️ Spacing
+              <Sliders size={13} /> Layout & Style
             </button>
           </div>
         </div>
 
-        {/* Spacing & Layout Customizer Drawer */}
+        {/* Layout & Style Customizer Drawer */}
         {layoutSettings.showCustomizer && (
           <div className="glass-card" style={{ padding: '1.25rem', marginBottom: '1rem', borderRadius: '0.75rem', display: 'flex', flexDirection: 'column', gap: '1rem', animation: 'tabFadeIn 0.2s ease' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.25rem' }}>
@@ -1649,7 +1687,115 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                 />
               </div>
 
+              {/* Section Spacing Slider */}
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
+                  <span>Section Spacing</span>
+                  <span style={{ fontWeight: 'bold', color: 'var(--color-primary-hover)' }}>{layoutSettings.sectionSpacing || 12}px</span>
+                </label>
+                <input 
+                  type="range" 
+                  min="4" 
+                  max="30" 
+                  step="1" 
+                  style={{ width: '100%', cursor: 'pointer', accentColor: 'var(--color-primary)' }}
+                  value={layoutSettings.sectionSpacing || 12} 
+                  onChange={e => setLayoutSettings(prev => ({ ...prev, sectionSpacing: parseInt(e.target.value) }))} 
+                />
+              </div>
 
+              {/* Google Fonts Selector */}
+              <div className="form-group" style={{ margin: 0 }}>
+                <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.78rem' }}>
+                  <span>Font Family</span>
+                  <span style={{ fontWeight: 'bold', color: 'var(--color-primary-hover)' }}>{layoutSettings.fontFamily || 'Plus Jakarta Sans'}</span>
+                </label>
+                <select 
+                  className="form-input" 
+                  value={layoutSettings.fontFamily || 'Plus Jakarta Sans'}
+                  onChange={e => setLayoutSettings(prev => ({ ...prev, fontFamily: e.target.value }))}
+                  style={{
+                    background: 'rgba(255,255,255,0.03)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: 'var(--text-main)',
+                    fontSize: '0.8rem',
+                    padding: '0.4rem 0.5rem',
+                    width: '100%',
+                    borderRadius: '0.375rem',
+                    height: '38px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="Plus Jakarta Sans">Plus Jakarta Sans (Default)</option>
+                  <option value="Inter">Inter (Clean Sans)</option>
+                  <option value="Outfit">Outfit (Modern Sans)</option>
+                  <option value="Lora">Lora (Classic Serif)</option>
+                  <option value="Playfair Display">Playfair Display (Elegant Serif)</option>
+                </select>
+              </div>
+
+              {/* Drag-and-Drop Section Reordering */}
+              <div className="form-group" style={{ gridColumn: '1 / -1', marginTop: '0.5rem', borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '0.75rem' }}>
+                <label className="form-label" style={{ fontSize: '0.8rem', fontWeight: 'bold', color: 'var(--color-primary-hover)', display: 'inline-flex', alignItems: 'center', gap: '0.35rem', marginBottom: '0.5rem' }}>
+                  <Menu size={11} /> Drag to Reorder Resume Sections
+                </label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                  {sections.map((secKey, idx) => (
+                    <div
+                      key={secKey}
+                      draggable
+                      onDragStart={(e) => {
+                        e.dataTransfer.setData('text/plain', idx);
+                        e.dataTransfer.effectAllowed = 'move';
+                      }}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        const sourceIndex = parseInt(e.dataTransfer.getData('text/plain'));
+                        const targetIndex = idx;
+                        if (sourceIndex === targetIndex) return;
+
+                        const updatedSections = [...sections];
+                        const [moved] = updatedSections.splice(sourceIndex, 1);
+                        updatedSections.splice(targetIndex, 0, moved);
+
+                        setResumeData(prev => ({
+                          ...prev,
+                          sections: updatedSections
+                        }));
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '0.5rem 0.75rem',
+                        background: 'rgba(255,255,255,0.02)',
+                        border: '1px solid rgba(255,255,255,0.06)',
+                        borderRadius: '0.5rem',
+                        cursor: 'grab',
+                        userSelect: 'none',
+                        fontSize: '0.75rem',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onDragEnter={(e) => e.currentTarget.style.borderColor = 'var(--color-primary)'}
+                      onDragLeave={(e) => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)'}
+                      onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                      onMouseLeave={e => {
+                        e.currentTarget.style.background = 'rgba(255,255,255,0.02)';
+                        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)';
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Menu size={13} style={{ color: 'var(--text-dim)', flexShrink: 0 }} />
+                        <span style={{ fontWeight: 600, color: 'var(--text-main)' }}>{getSectionLabel(secKey)}</span>
+                      </div>
+                      <span style={{ fontSize: '0.65rem', color: 'var(--text-dim)' }}>Draggable</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
 
             </div>
           </div>
@@ -1773,6 +1919,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
           id="printable-cv" 
           ref={resumePreviewRef}
           style={{
+            fontFamily: layoutSettings.fontFamily || 'Plus Jakarta Sans',
             fontSize: `${layoutSettings.fontSize}px`,
             lineHeight: layoutSettings.lineHeight,
             padding: `${layoutSettings.margin}mm`,
@@ -1790,9 +1937,12 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
           </div>
 
           {sections.map(secKey => {
+            const sectionStyle = {
+              marginBottom: `${layoutSettings.sectionSpacing || 12}px`
+            };
             if (secKey === 'summary' && resumeData.summary) {
               return (
-                <div key="summary">
+                <div key="summary" style={sectionStyle}>
                   <div className="section-title">Summary</div>
                   <p style={{ fontSize: '13px', color: '#334155' }}>{resumeData.summary}</p>
                 </div>
@@ -1800,7 +1950,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
             }
             if (secKey === 'skills' && resumeData.skills && resumeData.skills.length > 0) {
               return (
-                <div key="skills">
+                <div key="skills" style={sectionStyle}>
                   <div className="section-title">Skills & Technologies</div>
                   <p style={{ fontSize: '13px', color: '#334155', fontWeight: 'bold' }}>
                     {resumeData.skills.join(', ')}
@@ -1810,7 +1960,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
             }
             if (secKey === 'experience' && resumeData.experience && resumeData.experience.length > 0) {
               return (
-                <div key="experience">
+                <div key="experience" style={sectionStyle}>
                   <div className="section-title">Work Experience</div>
                   {resumeData.experience.map((exp, idx) => (
                     <div key={idx} className="resume-section-item" style={{ marginBottom: '1rem' }}>
@@ -1839,7 +1989,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
             }
             if (secKey === 'education' && resumeData.education && resumeData.education.length > 0) {
               return (
-                <div key="education">
+                <div key="education" style={sectionStyle}>
                   <div className="section-title">Education</div>
                   {resumeData.education.map((edu, idx) => (
                     <div key={idx} className="resume-section-item" style={{ marginBottom: '0.75rem' }}>
@@ -1855,7 +2005,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
             }
             if (secKey === 'projects' && resumeData.projects && resumeData.projects.length > 0) {
               return (
-                <div key="projects">
+                <div key="projects" style={sectionStyle}>
                   <div className="section-title">Personal Projects</div>
                   {resumeData.projects.map((proj, idx) => (
                     <div key={idx} className="resume-section-item" style={{ marginBottom: '1rem' }}>
@@ -1891,7 +2041,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
             const customSec = resumeData.customSections?.[secKey];
             if (customSec && customSec.items && customSec.items.length > 0) {
               return (
-                <div key={secKey}>
+                <div key={secKey} style={sectionStyle}>
                   <div className="section-title">{customSec.title}</div>
                   <ul style={{ paddingLeft: '1.2rem', marginTop: '0.25rem', fontSize: '12.5px', color: '#334155' }}>
                     {customSec.items.map((item, idx) => (
