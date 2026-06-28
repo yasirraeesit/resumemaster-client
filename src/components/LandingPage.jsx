@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sparkles, ArrowRight, Zap, Target, PenTool, Flame, ListChecks, HelpCircle, Check, Award, Wand2, Globe, Heart, Shield, RefreshCw, FileText, FileUp, Sparkle, Plus } from 'lucide-react';
 import ResumeTemplateSlider from './ResumeTemplateSlider';
 
-export default function LandingPage({ onLaunchWorkspace }) {
+export default function LandingPage({ onLaunchWorkspace, onSelectTemplates }) {
   const [activeFaq, setActiveFaq] = useState(null);
   const [activeStep, setActiveStep] = useState(0);
   
@@ -133,7 +133,7 @@ export default function LandingPage({ onLaunchWorkspace }) {
         </div>
 
         {/* Right Side: Light Mockup/Preview Panel */}
-        <div className="hero-landing-mockup" style={{ zIndex: 10 }}>
+        <div className="hero-landing-mockup" style={{ zIndex: 10 }} id="templates">
           <div style={{ position: 'absolute', top: '20%', right: '10%', width: '250px', height: '250px', background: 'rgba(139,92,246,0.06)', filter: 'blur(70px)', borderRadius: '50%', pointerEvents: 'none' }} />
           <div style={{ transform: 'translateY(-3rem)', width: '100%', display: 'flex', justifyContent: 'center', transition: 'all 0.3s ease' }}>
             <ResumeTemplateSlider />
@@ -142,7 +142,7 @@ export default function LandingPage({ onLaunchWorkspace }) {
       </section>
 
       {/* Bento Grid Features Section - Inspired by high-end design systems */}
-      <section style={{ padding: '6rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
+      <section id="features" style={{ padding: '6rem 2rem', maxWidth: '1200px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(139, 92, 246, 0.1)', border: '1px solid rgba(139, 92, 246, 0.15)', padding: '0.4rem 1rem', borderRadius: '9999px', fontSize: '0.8rem', color: 'var(--color-primary-hover)', fontWeight: 'bold', marginBottom: '1rem' }}>
             Features Set
@@ -471,7 +471,7 @@ export default function LandingPage({ onLaunchWorkspace }) {
       </section>
 
       {/* FAQ Section */}
-      <section style={{ padding: '6rem 2rem', maxWidth: '800px', margin: '0 auto' }}>
+      <section id="faq" style={{ padding: '6rem 2rem', maxWidth: '800px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '4rem' }}>
           <h2 style={{ fontSize: '2.5rem', fontWeight: '800', marginBottom: '1rem' }}>Frequently Asked Questions</h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>Quick answers to common questions about ResumeMaster.</p>
@@ -530,7 +530,7 @@ export default function LandingPage({ onLaunchWorkspace }) {
             <ul>
               <li><a href="#" className="footer-link">Google XYZ Formula Guide</a></li>
               <li><a href="#" className="footer-link">ATS Compatibility Blog</a></li>
-              <li><a href="#" className="footer-link">Resume Templates</a></li>
+              <li><a href="#" onClick={(e) => { e.preventDefault(); onSelectTemplates && onSelectTemplates(); }} className="footer-link">Resume Templates</a></li>
               <li><a href="#" className="footer-link">Help Center</a></li>
               <li><a href="#" className="footer-link">API Status</a></li>
             </ul>

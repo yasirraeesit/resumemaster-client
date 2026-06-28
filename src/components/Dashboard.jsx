@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
-  FileText, Briefcase, Award, Flame, TrendingUp,
+  FileText, Briefcase, Award, TrendingUp,
   PlusCircle, ChevronRight, BarChart2, Clock, Star
 } from 'lucide-react';
 
@@ -92,7 +92,6 @@ export default function Dashboard({ user, token, onNavigate, resumeData }) {
 
   const QUICK_ACTIONS = [
     { label: 'Resume Builder',    tab: 'builder',  Icon: FileText, color: '#10b981', desc: 'Edit & export your resume' },
-    { label: 'Job Matcher',       tab: 'matcher',  Icon: Flame,    color: '#f59e0b', desc: 'Swipe live job listings' },
     { label: 'Career Copilot',   tab: 'copilot',  Icon: Award,    color: '#a78bfa', desc: 'AI cover letters & mock interviews' },
     { label: 'Job Tracker',       tab: 'tracker',  Icon: Briefcase,color: '#3b82f6', desc: 'Track your applications' },
   ];

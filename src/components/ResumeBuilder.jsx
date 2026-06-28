@@ -162,21 +162,29 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
 
   // ── Passive Bullet Point Weak-Word Scanner ─────────────────────────
   const WEAK_PATTERNS = [
-    { regex: /^(worked on|work on)/i,    suggestion: 'Led', icon: '⚡' },
-    { regex: /^(helped with|helped)/i,   suggestion: 'Contributed to', icon: '💡' },
-    { regex: /^(assisted|assisting)/i,   suggestion: 'Supported', icon: '🔧' },
-    { regex: /^(responsible for)/i,      suggestion: 'Owned', icon: '🎯' },
-    { regex: /^(did|does|doing)/i,       suggestion: 'Executed', icon: '✅' },
-    { regex: /^(made)/i,                 suggestion: 'Built / Engineered', icon: '🏗️' },
-    { regex: /^(was in charge of)/i,     suggestion: 'Managed', icon: '📋' },
-    { regex: /^(tried to)/i,             suggestion: 'Achieved', icon: '🚀' },
-    { regex: /^(used|using)/i,           suggestion: 'Leveraged', icon: '⚙️' },
-    { regex: /^(got)/i,                  suggestion: 'Delivered', icon: '📦' },
-    { regex: /^(wrote)/i,                suggestion: 'Authored / Developed', icon: '✍️' },
-    { regex: /^(fixed)/i,                suggestion: 'Resolved / Optimized', icon: '🔩' },
-    { regex: /\bvarious\b/i,             suggestion: 'List specific examples instead of "various"', icon: '📝' },
-    { regex: /\bseveral\b/i,             suggestion: 'Be specific — use numbers like "5+ projects"', icon: '🔢' },
-    { regex: /\bsome\b/i,                suggestion: 'Quantify — avoid vague "some"', icon: '📊' },
+    { regex: /^(worked on|work on)/i,                suggestion: 'Led', icon: '⚡' },
+    { regex: /^(helped with|helped)/i,               suggestion: 'Contributed to', icon: '💡' },
+    { regex: /^(assisted|assisting)/i,               suggestion: 'Supported', icon: '🔧' },
+    { regex: /^(responsible for)/i,                  suggestion: 'Owned', icon: '🎯' },
+    { regex: /^(did|does|doing)/i,                   suggestion: 'Executed', icon: '✅' },
+    { regex: /^(made)/i,                             suggestion: 'Built / Engineered', icon: '🏗️' },
+    { regex: /^(was in charge of)/i,                 suggestion: 'Managed', icon: '📋' },
+    { regex: /^(tried to|tried)/i,                   suggestion: 'Spearheaded / Achieved', icon: '🚀' },
+    { regex: /^(used|using)/i,                       suggestion: 'Leveraged', icon: '⚙️' },
+    { regex: /^(got)/i,                              suggestion: 'Delivered', icon: '📦' },
+    { regex: /^(wrote)/i,                            suggestion: 'Authored / Developed', icon: '✍️' },
+    { regex: /^(fixed)/i,                            suggestion: 'Resolved / Optimized', icon: '🔩' },
+    { regex: /^(participated in|participated)/i,     suggestion: 'Collaborated on / Driven', icon: '🤝' },
+    { regex: /^(utilize|utilized)/i,                 suggestion: 'Leveraged / Deployed', icon: '⚙️' },
+    { regex: /^(managed to|managed)/i,               suggestion: 'Orchestrated / Directed', icon: '👑' },
+    { regex: /^(handled)/i,                          suggestion: 'Oversaw / Administered', icon: '💼' },
+    { regex: /^(guided)/i,                           suggestion: 'Mentored / Facilitated', icon: '🌱' },
+    { regex: /^(created)/i,                          suggestion: 'Designed / Innovated', icon: '🎨' },
+    { regex: /^(improved)/i,                         suggestion: 'Enhanced / Boosted', icon: '📈' },
+    { regex: /\bvarious\b/i,                         suggestion: 'List specific examples instead of "various"', icon: '📝' },
+    { regex: /\bseveral\b/i,                         suggestion: 'Be specific — use numbers like "5+ projects"', icon: '🔢' },
+    { regex: /\bsome\b/i,                            suggestion: 'Quantify — avoid vague "some"', icon: '📊' },
+    { regex: /\b(dynamic|motivated|team player|detail-oriented)\b/i, suggestion: 'Show impact instead of using clichés', icon: '📣' }
   ];
 
   const bulletWarnings = useMemo(() => {
@@ -185,6 +193,7 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
       ...(resumeData.experience || []).flatMap((exp, expIdx) =>
         (exp.description || '').split('\n').filter(Boolean).map(line => ({
           line: line.replace(/^[•\-\s]*/, '').trim(),
+          original: line,
           source: `Experience #${expIdx + 1}`,
           expIdx
         }))
@@ -192,22 +201,71 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
       ...(resumeData.projects || []).flatMap((proj, projIdx) =>
         (proj.description || '').split('\n').filter(Boolean).map(line => ({
           line: line.replace(/^[•\-\s]*/, '').trim(),
+          original: line,
           source: `Project: ${proj.name || `#${projIdx + 1}`}`,
           projIdx
         }))
       )
     ];
 
-    allBullets.forEach(({ line, source }) => {
+    allBullets.forEach(({ line, original, source, expIdx, projIdx }) => {
       WEAK_PATTERNS.forEach(({ regex, suggestion, icon }) => {
         if (regex.test(line)) {
-          warnings.push({ line, source, suggestion, icon });
+          const isFixable = !suggestion.includes(' ') || suggestion.includes(' / ');
+          warnings.push({ line, original, source, suggestion, icon, expIdx, projIdx, regex, isFixable });
         }
       });
     });
 
     return warnings;
   }, [resumeData.experience, resumeData.projects]);
+
+  const handleQuickFix = (warning) => {
+    const { line, original, suggestion, expIdx, projIdx, regex } = warning;
+    const cleanSuggestion = suggestion.split('/')[0].trim().split(' ')[0].trim();
+    const match = line.match(regex);
+    if (!match) return;
+    const weakWord = match[0];
+    const isCapitalized = weakWord && weakWord[0] === weakWord[0].toUpperCase();
+    const finalReplacement = isCapitalized 
+      ? cleanSuggestion.charAt(0).toUpperCase() + cleanSuggestion.slice(1)
+      : cleanSuggestion.toLowerCase();
+    const fixedLine = line.replace(regex, finalReplacement);
+
+    if (expIdx !== undefined) {
+      setResumeData(prev => {
+        const experience = [...(prev.experience || [])];
+        const exp = { ...experience[expIdx] };
+        const lines = (exp.description || '').split('\n');
+        const updatedLines = lines.map(l => {
+          if (l.trim() === original.trim()) {
+            const prefix = l.match(/^[•\-\s]*/)?.[0] || '• ';
+            return `${prefix}${fixedLine}`;
+          }
+          return l;
+        });
+        exp.description = updatedLines.join('\n');
+        experience[expIdx] = exp;
+        return { ...prev, experience };
+      });
+    } else if (projIdx !== undefined) {
+      setResumeData(prev => {
+        const projects = [...(prev.projects || [])];
+        const proj = { ...projects[projIdx] };
+        const lines = (proj.description || '').split('\n');
+        const updatedLines = lines.map(l => {
+          if (l.trim() === original.trim()) {
+            const prefix = l.match(/^[•\-\s]*/)?.[0] || '• ';
+            return `${prefix}${fixedLine}`;
+          }
+          return l;
+        });
+        proj.description = updatedLines.join('\n');
+        projects[projIdx] = proj;
+        return { ...prev, projects };
+      });
+    }
+  };
 
   useEffect(() => {
     fetchResumes();
@@ -678,8 +736,30 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                         📍 {w.source}
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right', color: '#10b981', fontSize: '0.72rem', whiteSpace: 'nowrap', fontWeight: 600 }}>
-                      → {w.suggestion}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.3rem' }}>
+                      <div style={{ color: '#10b981', fontSize: '0.72rem', whiteSpace: 'nowrap', fontWeight: 600 }}>
+                        → {w.suggestion}
+                      </div>
+                      {w.isFixable && (
+                        <button
+                          onClick={() => handleQuickFix(w)}
+                          style={{
+                            padding: '0.15rem 0.45rem',
+                            fontSize: '0.65rem',
+                            borderRadius: '4px',
+                            background: 'rgba(16,185,129,0.1)',
+                            border: '1px solid rgba(16,185,129,0.3)',
+                            color: '#10b981',
+                            cursor: 'pointer',
+                            transition: 'all 0.15s ease',
+                            fontWeight: 'bold'
+                          }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = '#10b981'; e.currentTarget.style.color = '#fff'; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(16,185,129,0.1)'; e.currentTarget.style.color = '#10b981'; }}
+                        >
+                          Quick Fix
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -1481,7 +1561,6 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                     <div key={idx} style={{ marginBottom: '1rem' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '13.5px' }}>
                         <span>{proj.name}</span>
-                        {proj.url && <span style={{ fontSize: '11px', color: '#2563eb' }}>{proj.url}</span>}
                       </div>
                       {proj.description && (
                         <ul style={{ paddingLeft: '1.2rem', marginTop: '0.25rem', fontSize: '12.5px', color: '#334155' }}>
@@ -1496,6 +1575,11 @@ export default function ResumeBuilder({ resumeData, setResumeData, token, onTrig
                               </li>
                             ))}
                         </ul>
+                      )}
+                      {proj.url && (
+                        <div style={{ fontSize: '11.5px', marginTop: '0.2rem', paddingLeft: '1.2rem', textAlign: 'left' }}>
+                          🔗 <a href={proj.url.startsWith('http') ? proj.url : `https://${proj.url}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--theme-color, #2563eb)', textDecoration: 'none', fontWeight: 500 }}>{proj.url}</a>
+                        </div>
                       )}
                     </div>
                   ))}

@@ -621,9 +621,11 @@ export default function ResumeTemplateSlider() {
               </div>
 
               <div>
-                <div style={{ background: '#f5f3ff', borderLeft: '4px solid #4f46e5', fontSize: '11px', fontWeight: 'bold', padding: '0.2rem 0.5rem', marginBottom: '0.4rem', color: '#1e1b4b', letterSpacing: '0.02em' }}>TECHNICAL MATRIX</div>
-                <div style={{ fontSize: '10.5px', color: '#334155', fontWeight: 600 }}>
-                  {p.skills.join('  •  ')}
+                <div style={{ background: '#f5f3ff', borderLeft: '4px solid #4f46e5', fontSize: '11px', fontWeight: 'bold', padding: '0.2rem 0.5rem', marginBottom: '0.5rem', color: '#1e1b4b', letterSpacing: '0.02em' }}>TECHNICAL MATRIX</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.25rem' }}>
+                  {p.skills.map((s, idx) => (
+                    <span key={idx} style={{ background: 'rgba(79,70,229,0.06)', color: '#4f46e5', fontSize: '9px', padding: '0.15rem 0.45rem', borderRadius: '4px', border: '1px solid rgba(79,70,229,0.15)', fontWeight: 600 }}>{s}</span>
+                  ))}
                 </div>
               </div>
             </div>
@@ -648,12 +650,10 @@ export default function ResumeTemplateSlider() {
                 </div>
 
                 <div>
-                  <div style={{ fontSize: '10.5px', fontWeight: 'bold', color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.35rem' }}>Expertise</div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                  <div style={{ fontSize: '10.5px', fontWeight: 'bold', color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Expertise</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.3rem' }}>
                     {p.skills.map((s, idx) => (
-                      <div key={idx} style={{ fontSize: '9.5px', color: '#cbd5e1', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
-                        <span style={{ color: '#a78bfa' }}>&bull;</span> {s}
-                      </div>
+                      <span key={idx} style={{ fontSize: '8.5px', padding: '0.15rem 0.4rem', borderRadius: '3px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#cbd5e1' }}>{s}</span>
                     ))}
                   </div>
                 </div>

@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import LandingPage    from './components/LandingPage';
 import ResumeBuilder  from './components/ResumeBuilder';
-import JobMatcher     from './components/JobMatcher';
 import JobTracker     from './components/JobTracker';
 import CareerSuite    from './components/CareerSuite';
 import LoginPage      from './components/LoginPage';
@@ -9,10 +8,11 @@ import RegisterPage   from './components/RegisterPage';
 import ProfilePage    from './components/ProfilePage';
 import SettingsPage   from './components/SettingsPage';
 import Dashboard      from './components/Dashboard';
+import TemplatesLibraryPage from './components/TemplatesLibraryPage';
 import { ToastProvider } from './components/Toast';
 import {
-  FileText, Flame, Briefcase, Award,
-  LogIn, LayoutDashboard, Settings, LogOut, User, Sun, Moon,
+  FileText, Briefcase, Award,
+  LogIn, LayoutDashboard, Settings, LogOut, User, Sun, Moon, LayoutGrid,
 } from 'lucide-react';
 
 /* ── Demo resume data ───────────────────────────────────────────── */
@@ -73,11 +73,11 @@ const INITIAL_TRACKER_COLUMNS = {
 const HIDDEN_PAGES = new Set(['profile', 'settings']);
 
 const NAV_TABS = [
-  { key: 'dashboard', label: 'Dashboard',      Icon: LayoutDashboard },
-  { key: 'builder',   label: 'Resume Builder', Icon: FileText         },
-  { key: 'matcher',   label: 'Job Matcher',    Icon: Flame            },
-  { key: 'tracker',   label: 'Job Tracker',    Icon: Briefcase        },
-  { key: 'copilot',   label: 'Career Copilot', Icon: Award            },
+  { key: 'dashboard', label: 'Dashboard',       Icon: LayoutDashboard },
+  { key: 'templates', label: 'Resumes Library', Icon: LayoutGrid      },
+  { key: 'builder',   label: 'Resume Builder',  Icon: FileText        },
+  { key: 'tracker',   label: 'Job Tracker',     Icon: Briefcase       },
+  { key: 'copilot',   label: 'Career Copilot',  Icon: Award           },
 ];
 
 /* ═══════════════════════════════════════════════════════════════════
@@ -255,6 +255,7 @@ export default function App() {
     return localStorage.getItem('activeTab') || 'dashboard';
   });
   const [resumeData,       setResumeData]       = useState(INITIAL_RESUME);
+  const [selectedTemplate, setSelectedTemplate] = useState('elegant');
   const [trackerColumns,   setTrackerColumns]   = useState(INITIAL_TRACKER_COLUMNS);
   const [darkMode,         setDarkMode]         = useState(true);
 
@@ -338,6 +339,20 @@ export default function App() {
     setActiveTab('builder');
   };
 
+  const handleTemplatesClick = useCallback((e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    if (user) {
+      navigate('templates');
+    } else {
+      const guestUser = { id: 'guest', fullName: 'Guest User', email: 'guest@resumemaster.online' };
+      setUser(guestUser);
+      setToken('');
+      localStorage.setItem('user', JSON.stringify(guestUser));
+      localStorage.removeItem('token');
+      navigate('templates');
+    }
+  }, [user, navigate]);
+
   /* ── Auth pages ─────────────────────────────────────────────────── */
   if (view === 'login') {
     return (
@@ -386,13 +401,21 @@ export default function App() {
       <ToastProvider>
         <div>
           <AppHeader {...headerProps}>
-            {user && (
-              <button className="btn-secondary" style={{ padding: '0.45rem 0.9rem', fontSize: '0.82rem' }} onClick={goToWorkspace}>
-                Go to Workspace
-              </button>
-            )}
+            <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+              <a href="#features" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>Features</a>
+              <a href="#templates" onClick={handleTemplatesClick} style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>Templates</a>
+              <a href="#faq" style={{ color: 'var(--text-muted)', fontSize: '0.85rem', fontWeight: 600, textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={e => e.currentTarget.style.color = '#fff'} onMouseLeave={e => e.currentTarget.style.color = 'var(--text-muted)'}>FAQ</a>
+              {user && (
+                <button className="btn-secondary" style={{ padding: '0.45rem 0.9rem', fontSize: '0.82rem', marginLeft: '0.5rem' }} onClick={goToWorkspace}>
+                  Go to Workspace
+                </button>
+              )}
+            </div>
           </AppHeader>
-          <LandingPage onLaunchWorkspace={() => user ? goToWorkspace() : setView('register')} />
+          <LandingPage 
+            onLaunchWorkspace={() => user ? goToWorkspace() : setView('register')} 
+            onSelectTemplates={handleTemplatesClick}
+          />
         </div>
       </ToastProvider>
     );
@@ -422,15 +445,24 @@ export default function App() {
             {activeTab === 'dashboard' && (
               <Dashboard user={user} token={token} resumeData={resumeData} onNavigate={setActiveTab} />
             )}
-            {activeTab === 'builder' && (
-              <ResumeBuilder resumeData={resumeData} setResumeData={setResumeData} token={token} onTriggerAuth={() => setView('login')} />
+            {activeTab === 'templates' && (
+              <TemplatesLibraryPage
+                selectedTemplate={selectedTemplate}
+                onSelectTemplate={(templateId) => {
+                  setSelectedTemplate(templateId);
+                  setActiveTab('builder');
+                }}
+              />
             )}
-            {activeTab === 'matcher' && (
-              <JobMatcher
-                resumeData={resumeData}
-                setResumeData={setResumeData}
-                onAddToWishlist={addToTrackerWishlist}
-                onGoToTracker={() => setActiveTab('tracker')}
+            {activeTab === 'builder' && (
+              <ResumeBuilder 
+                resumeData={resumeData} 
+                setResumeData={setResumeData} 
+                token={token} 
+                onTriggerAuth={() => setView('login')}
+                selectedTemplate={selectedTemplate}
+                setSelectedTemplate={setSelectedTemplate}
+                onSelectTemplatesLibrary={() => setActiveTab('templates')}
               />
             )}
             {activeTab === 'tracker' && (
